@@ -286,8 +286,8 @@ func DbtUploadCommand() *cobra.Command {
 func init() {
 	DbtExecCmd.Flags().StringVar(&synqToken, "token", "", "Your Synq connection token")
 	DbtExecCmd.Flags().StringVar(&dbtBin, "dbt-bin", "dbt", "Location of dbt binary")
-	DbtExecCmd.Flags().StringVar(&prodUrl, "prod-url", "dbt-upload.synq.io:443", "Upload url for the dbt run results")
-	DbtExecCmd.Flags().StringVar(&stagingUrl, "staging-url", "dbt-upload.synq.dev:443", "Upload url for the dbt run results")
+	DbtExecCmd.Flags().StringVar(&prodUrl, "prod-url", "dbt-uploader-xwpzuoapgq-lm.a.run.app:443", "Upload url for the dbt run results")
+	DbtExecCmd.Flags().StringVar(&stagingUrl, "staging-url", "dbt-uploader-hcdlgjmqkq-lm.a.run.app:443", "Upload url for the dbt run results")
 	DbtExecCmd.Flags().BoolVar(&wantsStaging, "staging", false, "This uploads the data to synq staging")
 	DbtExecCmd.Flags().StringVar(&targetDirectory, "target-dir", "target", "Target directory, where DBT stores manifest.json")
 
