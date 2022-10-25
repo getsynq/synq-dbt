@@ -18,59 +18,56 @@ var (
 func ReadDbtArtifactsToReq(targetPath string) (*v1.DbtResult, error) {
 	dbtResult := &v1.DbtResult{}
 
-	manifest, err := os.ReadFile(filepath.Join(targetPath, "manifest.json"))
-	if err == nil {
-		manifestInvocationId := json.Get(manifest, "metadata", "invocation_id").ToString()
-		logrus.Infof("syn-dbt manifest.json found with invocation_id=`%s`", manifestInvocationId)
-
-		dbtResult.InvocationId = manifestInvocationId
-		dbtResult.Manifest = wrapperspb.String(string(manifest))
-	} else {
-		logrus.Infof("syn-dbt %s", err)
+	manifest, invocationId, err := readArtifact(targetPath, "manifest.json")
+	if err != nil {
+		dbtResult.InvocationId = invocationId
+		dbtResult.Manifest = wrapperspb.String(manifest)
 	}
 
-	runResults, err := os.ReadFile(filepath.Join(targetPath, "run_results.json"))
-	if err == nil {
-		runResultsInvocationId := json.Get(runResults, "metadata", "invocation_id").ToString()
-		logrus.Infof("syn-dbt run_results.json found with invocation_id=`%s`", runResultsInvocationId)
-
+	runResults, invocationId, err := readArtifact(targetPath, "run_results.json")
+	if err != nil {
 		if dbtResult.InvocationId == "" {
-			dbtResult.InvocationId = runResultsInvocationId
+			dbtResult.InvocationId = invocationId
 		}
-		dbtResult.RunResults = wrapperspb.String(string(runResults))
-	} else {
-		logrus.Infof("syn-dbt %s", err)
+
+		dbtResult.RunResults = wrapperspb.String(runResults)
 	}
 
-	catalog, err := os.ReadFile(filepath.Join(targetPath, "catalog.json"))
-	if err == nil {
-		catalogInvocationId := json.Get(catalog, "metadata", "invocation_id").ToString()
-		logrus.Infof("syn-dbt catalog.json found with invocation_id=`%s`", catalogInvocationId)
-
+	catalog, invocationId, err := readArtifact(targetPath, "catalog.json")
+	if err != nil {
 		if dbtResult.InvocationId == "" {
-			dbtResult.InvocationId = catalogInvocationId
+			dbtResult.InvocationId = invocationId
 		}
-		dbtResult.Catalog = wrapperspb.String(string(catalog))
-	} else {
-		logrus.Infof("syn-dbt %s", err)
+
+		dbtResult.Catalog = wrapperspb.String(catalog)
 	}
 
-	sources, err := os.ReadFile(filepath.Join(targetPath, "sources.json"))
-	if err == nil {
-		sourcesInvocationId := json.Get(sources, "metadata", "invocation_id").ToString()
-		logrus.Infof("syn-dbt sources.json found with invocation_id=`%s`", sourcesInvocationId)
-
+	sources, invocationId, err := readArtifact(targetPath, "sources.json")
+	if err != nil {
 		if dbtResult.InvocationId == "" {
-			dbtResult.InvocationId = sourcesInvocationId
+			dbtResult.InvocationId = invocationId
 		}
-		dbtResult.Sources = wrapperspb.String(string(sources))
-	} else {
-		logrus.Infof("syn-dbt %s", err)
+
+		dbtResult.Sources = wrapperspb.String(sources)
 	}
 
-	if manifest == nil && runResults == nil && catalog == nil && sources == nil {
+	if manifest == "" && runResults == "" && catalog == "" && sources == "" {
 		return nil, fmt.Errorf("no valid dbt artifacts found in `%s`", targetPath)
 	}
 
 	return dbtResult, nil
+}
+
+func readArtifact(directory, name string) (string, string, error) {
+	catalog, err := os.ReadFile(filepath.Join(directory, name))
+	if err != nil {
+		logrus.Infof("syn-dbt %s, skipping", err)
+		return "", "", err
+	}
+
+	invocationId := json.Get(catalog, "metadata", "invocation_id").ToString()
+
+	logrus.Infof("syn-dbt %s found with invocation_id=`%s`", name, invocationId)
+
+	return string(catalog), invocationId, nil
 }

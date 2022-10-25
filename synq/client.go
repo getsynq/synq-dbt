@@ -8,13 +8,8 @@ import (
 
 	dbtv1 "github.com/getsynq/cloud/api/clients/dbt/v1"
 	v1 "github.com/getsynq/cloud/api/clients/v1"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-)
-
-var (
-	logger = logrus.WithField("app", "synq-dbt")
 )
 
 type Api struct {
