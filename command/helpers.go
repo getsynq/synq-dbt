@@ -4,26 +4,15 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 )
 
 var (
 	exitError *exec.ExitError
-	logger    = logrus.WithField("app", "synq-client")
 )
 
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
-func WrapCommand(cmdName string, args ...string) (error, int) {
+func ExecuteCommand(cmdName string, args ...string) (int, error) {
 	cmd := exec.Command(cmdName, args...)
 	stdOutReader, err := cmd.StdoutPipe()
 	if err != nil {
@@ -39,31 +28,27 @@ func WrapCommand(cmdName string, args ...string) (error, int) {
 	stdOutScanner := bufio.NewScanner(stdOutReader)
 	go func() {
 		for stdOutScanner.Scan() {
-			fmt.Println(stdOutScanner.Text())
+			fmt.Fprintln(os.Stdout, stdOutScanner.Text())
 		}
 	}()
 
 	stdErrScanner := bufio.NewScanner(stdErrReader)
 	go func() {
 		for stdErrScanner.Scan() {
-			fmt.Println(stdErrScanner.Text())
+			fmt.Fprintln(os.Stderr, stdErrScanner.Text())
 		}
 	}()
 
 	if err = cmd.Start(); err != nil {
-		return err, 1
+		return 1, err
 	}
 
 	err = cmd.Wait()
 	if err != nil {
 		if errors.As(err, &exitError) {
-			return err, exitError.ExitCode()
+			return exitError.ExitCode(), err
 		}
 	}
 
-	return nil, 0
-}
-
-func log(msg string, level logrus.Level) {
-	logger.Log(level, msg)
+	return 0, nil
 }
