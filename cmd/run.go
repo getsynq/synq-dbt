@@ -6,11 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"log"
-
 	"github.com/getsynq/synq-dbt/command"
 	"github.com/getsynq/synq-dbt/dbt"
 	"github.com/getsynq/synq-dbt/synq"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +22,7 @@ var runCmd = &cobra.Command{
 		// Collect all arguments including flags
 		args = os.Args[1:]
 
-		log.Printf("syn-dbt processing `dbt %s`", strings.Join(args, " "))
+		logrus.Infof("syn-dbt processing `dbt %s`", strings.Join(args, " "))
 
 		dbtBin := "dbt"
 
@@ -35,10 +34,8 @@ var runCmd = &cobra.Command{
 		}
 
 		if err := uploadArtifactsToSynq(cmd.Context()); err != nil {
-			log.Printf("syn-dbt failed: %s", err.Error())
+			logrus.Printf("syn-dbt failed: %s", err.Error())
 		}
-
-		log.Printf("syn-dbt successful")
 
 		return nil
 	},
@@ -50,14 +47,14 @@ func uploadArtifactsToSynq(ctx context.Context) error {
 	targetDirectory := "target"
 	url := "dbt-uploader-xwpzuoapgq-lm.a.run.app:443"
 
-	log.Printf("syn-dbt processing `%s`, uploading to `%s`", targetDirectory, url)
+	logrus.Infof("syn-dbt processing `%s`, uploading to `%s`", targetDirectory, url)
 
 	token, ok := os.LookupEnv("SYNQ_TOKEN")
 	if !ok {
 		return errors.New("environment variable SYNQ_TOKEN was not set")
 	}
 
-	if _, err := os.Stat(targetDirectory); !os.IsNotExist(err) {
+	if _, err := os.Stat(targetDirectory); os.IsNotExist(err) {
 		return err
 	}
 
@@ -73,5 +70,12 @@ func uploadArtifactsToSynq(ctx context.Context) error {
 
 	dbtArtifactsReq.Token = token
 
-	return api.SendRequest(ctx, dbtArtifactsReq)
+	err = api.SendRequest(ctx, dbtArtifactsReq)
+	if err != nil {
+		return err
+	}
+
+	logrus.Infof("syn-dbt successful")
+
+	return nil
 }
