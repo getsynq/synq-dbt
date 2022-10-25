@@ -40,7 +40,18 @@ func CreateDbtServiceClient(url string) (dbtv1.DbtServiceClient, error) {
 }
 
 type Api struct {
-	DbtClient dbtv1.DbtServiceClient
+	client dbtv1.DbtServiceClient
+}
+
+func NewApi(url string) (*Api, error) {
+	client, err := CreateDbtServiceClient(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Api{
+		client: client,
+	}, nil
 }
 
 func (api *Api) SendRequest(ctx context.Context, dbtArtifacts *v1.DbtResult) error {
@@ -49,7 +60,7 @@ func (api *Api) SendRequest(ctx context.Context, dbtArtifacts *v1.DbtResult) err
 	defer cancel()
 
 	if dbtArtifacts.Manifest != nil || dbtArtifacts.RunResults != nil || dbtArtifacts.Catalog != nil || dbtArtifacts.Sources != nil {
-		_, err := api.DbtClient.PostDbtResult(timeoutCtx, &dbtv1.PostDbtResultRequest{
+		_, err := api.client.PostDbtResult(timeoutCtx, &dbtv1.PostDbtResultRequest{
 			DbtResult: dbtArtifacts,
 		})
 		if err != nil {
