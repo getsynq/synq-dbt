@@ -6,40 +6,34 @@ synq-dbt is command line tool that executes dbt and uploads dbt artifacts to [Sy
 
 ### How does it work?
 
-synq-dbt works in the following steps:
+synq-dbt is dbt version agnostic and works with any version of dbt in the following steps:
 
-1) Execute your locally installed dbt. Arguments you supply synq-dbt are passes to dbt. For example, your current command `dbt run --models=finance --threads 5` becomes `synq-dbt run --models=finance --threads 5` or `dbt test --models=reports` becomes `synq-dbt test --models=reports`.
+1) Execute your locally installed `dbt`. Arguments you supply to `synq-dbt` are passes to `dbt`. For example, your current command `dbt run --models=finance --threads 5` becomes `synq-dbt run --models=finance --threads 5` or `dbt test --models=reports` becomes `synq-dbt test --models=reports`.
 2) Stores the exit code of the dbt command.
 3) Reads environment variable `SYNQ_TOKEN`.
 4) Uploads `manifest.json`, `run_results.json`, `catalog.json` and `schema.json` from `./target` directory to [Synq](https://app.synq.io).
 4) Returns stored dbt's exit code.
 
-**Note:** synq-dbt is dbt version agnostic and works with any version of dbt.
+
 
 ## Installation
 
-To successfully install synq-dbt you will need the following variables:
-
-| Variable             |                              Description                             |
-|----------------------|:--------------------------------------------------------------------:|
-| SYNQ_TOKEN           | Synq token for your dbt integration you will receive from Synq team. |
+To successfully install synq-dbt you will need `SYNQ_TOKEN` secret, that you receive from Synq team. It should be treated as a secret as it allows Synq to identify you as customer to associate uploaded data with your workspace.
 
 ### Airflow
 
-We will cover two most common setups of dbt and Airflow in this guide. In case none of these options works for you, please contact us.
+We will cover two most common setups of dbt and Airflow. In case none of these options works for you, please contact us.
 
-1) In Airflow UI, go to Environment variables. Create a new ENV variable called `SYNQ_TOKEN` with Synq token as a value.
-2) 
-   1) In case you run dbt via a [DockerOperator](https://airflow.apache.org/docs/apache-airflow-providers-docker/stable/_api/airflow/providers/docker/operators/docker/index.html) [follow these instructions](https://github.com/getsynq/synq-dbt#airflow-with-a-docker-runner)
-   2) In case you run dbt via [dbt's plugin](https://github.com/gocardless/airflow-dbt) [follow these instructions](https://github.com/getsynq/synq-dbt#airflow-with-dbt-plugin)
+1) In case you run dbt via a [DockerOperator](https://airflow.apache.org/docs/apache-airflow-providers-docker/stable/_api/airflow/providers/docker/operators/docker/index.html) [follow these instructions](https://github.com/getsynq/synq-dbt#airflow-with-a-docker-runner)
+2) In case you run dbt via [dbt's plugin](https://github.com/gocardless/airflow-dbt) [follow these instructions](https://github.com/getsynq/synq-dbt#airflow-with-dbt-plugin)
 
 ### Airflow with a DockerOperator
 
-**Preflight check**:
-- You have `SYNQ_TOKEN` environment variable set in Airflow UI 
+1) In Airflow UI, go to Environment variables. Create a new ENV variable called `SYNQ_TOKEN` with Synq token as a value.
 
-DockerOperator uses Docker container as a runner where everything is executed. For this we will need to install `synq-dbt` 
-into the runner's container. Add the following lines to your runner's Dockerfile to install synq-dbt:
+2) Install `synq-dbt` into Docker container that is executed by your DockerOperator
+
+Add the following lines to your runner's Dockerfile to install synq-dbt:
 
 ```dockerfile
 ENV SYNQ_VERSION=v1.1.0
@@ -47,10 +41,9 @@ RUN wget -O /usr/bin/synq-dbt https://github.com/getsynq/synq-dbt/releases/downl
 RUN chmod +x /usr/bin/synq-dbt
 ```
 
-Now, depending on your setup you might need to change either entrypoint (usually last line in Dockerfile) from `dbt` to `synq-dbt` 
-Or in case that you change the command in the DbtOperator itself, change the command in your Airflow's Dag from `dbt` to `synq-dbt`
+3) Change Docker container entrypoint (usually last line in Dockerfile) from `dbt` to `synq-dbt` OR change the command in the DbtOperator itself in your Airflow's Dag from `dbt` to `synq-dbt`
 
-In the case of DbtOperator command change, the result would look similar to this:
+In the case of DbtOperator command change, the result would look as follows:
 
 ```python
 KubernetesPodOperator(
@@ -60,21 +53,17 @@ KubernetesPodOperator(
 )
 ```
 
-You're all set!
+You're all set! :tada:
 
 ### Airflow with DBT Plugin
 
-You will need to install synq-dbt into your airflow cluster. You can [follow the instructions in the Intalling on Linux section](https://github.com/getsynq/synq-dbt#linux)
+1) In Airflow UI, go to Environment variables. Create a new ENV variable called `SYNQ_TOKEN` with Synq token as a value.
 
+2) Install synq-dbt into your airflow cluster. You can [follow the instructions in the Intalling on Linux section](https://github.com/getsynq/synq-dbt#linux)
 
-**Preflight check**:
-- You have `SYNQ_TOKEN` environment variable set in Airflow UI
-- You have `synq-dbt` installed in your Airflow cluster
+3) Every `Dbt*Operator` supports a `bin` argument which specifies, what binary the operator executes.
 
-Every `Dbt*Operator` supports a `bin` argument which dictates, what binary the operator executes.
-The only change you need to do is to add this argument to all of your operators.
-
-The result looks like:
+The result should look as follows:
 
 ```python
   dbt_run = DbtRunOperator(
@@ -83,7 +72,7 @@ The result looks like:
   )
 ```
 
-You're all set!
+You're all set! :tada:
 
 ### Docker
 
