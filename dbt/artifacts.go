@@ -61,13 +61,13 @@ func ReadDbtArtifactsToReq(targetPath string) (*v1.DbtResult, error) {
 func readArtifact(directory, name string) (string, string, error) {
 	artifact, err := os.ReadFile(filepath.Join(directory, name))
 	if err != nil {
-		logrus.Infof("syn-dbt %s, skipping", err)
+		logrus.Infof("synq-dbt %s, skipping", err)
 		return "", "", err
 	}
 
 	invocationId := json.Get(artifact, "metadata", "invocation_id").ToString()
 
-	logrus.Infof("syn-dbt %s found with invocation_id=`%s`", name, invocationId)
+	logrus.Infof("synq-dbt %s found with invocation_id=`%s`", name, invocationId)
 
 	return string(artifact), invocationId, nil
 }

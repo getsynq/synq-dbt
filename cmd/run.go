@@ -21,7 +21,7 @@ var runCmd = &cobra.Command{
 		// Load configuration
 		token, ok := os.LookupEnv("SYNQ_TOKEN")
 		if !ok {
-			logrus.Printf("syn-dbt failed: missing SYNQ_TOKEN variable")
+			logrus.Printf("synq-dbt failed: missing SYNQ_TOKEN variable")
 		}
 
 		url, ok := os.LookupEnv("SYNQ_UPLOAD_URL")
@@ -42,7 +42,7 @@ var runCmd = &cobra.Command{
 		// Collect all arguments including flags
 		args = os.Args[1:]
 
-		logrus.Infof("syn-dbt processing `%s %s`", dbtBin, strings.Join(args, " "))
+		logrus.Infof("synq-dbt processing `%s %s`", dbtBin, strings.Join(args, " "))
 
 		exitCode, err := command.ExecuteCommand(dbtBin, args...)
 		if err != nil {
@@ -51,7 +51,7 @@ var runCmd = &cobra.Command{
 
 		if token != "" {
 			if err := uploadArtifactsToSynq(cmd.Context(), targetDirectory, token, url); err != nil {
-				logrus.Printf("syn-dbt failed: %s", err.Error())
+				logrus.Printf("synq-dbt failed: %s", err.Error())
 			}
 		}
 
@@ -60,7 +60,7 @@ var runCmd = &cobra.Command{
 }
 
 func uploadArtifactsToSynq(ctx context.Context, targetDirectory, token, url string) error {
-	logrus.Infof("syn-dbt processing `%s`, uploading to `%s`", targetDirectory, url)
+	logrus.Infof("synq-dbt processing `%s`, uploading to `%s`", targetDirectory, url)
 
 	if _, err := os.Stat(targetDirectory); os.IsNotExist(err) {
 		return err
@@ -83,7 +83,7 @@ func uploadArtifactsToSynq(ctx context.Context, targetDirectory, token, url stri
 		return err
 	}
 
-	logrus.Infof("syn-dbt successful")
+	logrus.Infof("synq-dbt successful")
 
 	return nil
 }
