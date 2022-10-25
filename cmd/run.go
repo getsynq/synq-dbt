@@ -24,17 +24,17 @@ var runCmd = &cobra.Command{
 			logrus.Printf("syn-dbt failed: missing SYNQ_TOKEN variable")
 		}
 
-		url, ok := os.LookupEnv("UPLOAD_URL")
+		url, ok := os.LookupEnv("SYNQ_UPLOAD_URL")
 		if !ok {
 			url = "dbt-uploader-xwpzuoapgq-lm.a.run.app:443"
 		}
 
-		targetDirectory, ok := os.LookupEnv("TARGET_DIR")
+		targetDirectory, ok := os.LookupEnv("SYNQ_TARGET_DIR")
 		if !ok {
 			targetDirectory = "target"
 		}
 
-		dbtBin, ok := os.LookupEnv("DBT_BIN")
+		dbtBin, ok := os.LookupEnv("SYNQ_DBT_BIN")
 		if !ok {
 			dbtBin = "dbt"
 		}
