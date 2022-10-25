@@ -62,4 +62,4 @@ name: release synq-dbt
 "on":
   push:
     tags:
-      - synq-dbt-v*.*.*
+      - v*.*.*
