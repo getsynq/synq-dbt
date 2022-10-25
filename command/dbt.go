@@ -4,17 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 
-	v1 "github.com/getsynq/cloud/api/clients/v1"
+	"github.com/getsynq/cloud/synq-clients/commanders/dbt/dbt"
 	"github.com/getsynq/cloud/synq-clients/commanders/dbt/synq"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 	//"time"
 )
 
@@ -82,7 +78,7 @@ func ProcessTargetCmd(cmd *cobra.Command, args []string) error {
 			DbtClient: client,
 		}
 
-		dbtArtifacts, err := buildDbtArtifactsReq(context.Background(), targetDirectory)
+		dbtArtifacts, err := dbt.ReadDbtArtifactsToReq(targetDirectory)
 		if err != nil {
 			return err
 		}
@@ -99,41 +95,6 @@ func ProcessTargetCmd(cmd *cobra.Command, args []string) error {
 		os.Exit(dbtCmdExitCode)
 	}
 	return nil
-}
-
-func fileToReader(filePath string) (*io.PipeReader, error) {
-	r, w := io.Pipe()
-	if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
-		log("file not found "+filePath, logrus.WarnLevel)
-		return nil, nil
-	} else {
-		file, err := os.Open(filePath)
-		if err != nil {
-			return nil, err
-		}
-
-		go func() {
-			if _, err := io.Copy(w, file); err != nil {
-				fmt.Println(err.Error())
-			}
-			defer file.Close()
-			defer w.Close()
-		}()
-		return r, nil
-	}
-}
-
-func GetBytes(r *io.PipeReader) ([]byte, error) {
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-
-	if !json.Valid(b) {
-		return nil, fmt.Errorf("is not a valid json")
-	}
-
-	return b, nil
 }
 
 func Execute() {
@@ -169,93 +130,3 @@ func init() {
 		return
 	}
 }
-
-func buildDbtArtifactsReq(ctx context.Context, targetPath string) (*v1.DbtResult, error) {
-	manifest, err := fileToReader(filepath.Join(targetPath, "manifest.json"))
-	if err != nil {
-		return nil, err
-	}
-	runResults, err := fileToReader(filepath.Join(targetPath, "run_results.json"))
-	if err != nil {
-		return nil, err
-	}
-	catalog, err := fileToReader(filepath.Join(targetPath, "catalog.json"))
-	if err != nil {
-		return nil, err
-	}
-	sources, err := fileToReader(filepath.Join(targetPath, "sources.json"))
-	if err != nil {
-		return nil, err
-	}
-
-	dbtResult := &v1.DbtResult{}
-
-	var manifestInvocationId string
-
-	if manifest != nil {
-		bytes, err := GetBytes(manifest)
-		if err != nil {
-			return nil, fmt.Errorf("problem parsing manifest.json: %+v", err)
-		}
-		manifestInvocationId = json.Get(bytes, "metadata", "invocation_id").ToString()
-		dbtResult.InvocationId = manifestInvocationId
-		dbtResult.Manifest = wrapperspb.String(string(bytes))
-	}
-
-	if runResults != nil {
-		bytes, err := GetBytes(runResults)
-		if err != nil {
-			return nil, fmt.Errorf("problem parsing run_results.json: %+v", err)
-		}
-		runResultsInvocationId := json.Get(bytes, "metadata", "invocation_id").ToString()
-		if dbtResult.InvocationId == "" {
-			dbtResult.InvocationId = runResultsInvocationId
-		}
-		dbtResult.RunResults = wrapperspb.String(string(bytes))
-	}
-
-	if catalog != nil {
-		bytes, err := GetBytes(catalog)
-		if err != nil {
-			return nil, fmt.Errorf("problem parsing catalog.json: %+v", err)
-		}
-		catalogInvocationId := json.Get(bytes, "metadata", "invocation_id").ToString()
-		if dbtResult.InvocationId == "" {
-			dbtResult.InvocationId = catalogInvocationId
-		}
-		dbtResult.Catalog = wrapperspb.String(string(bytes))
-	}
-
-	if sources != nil {
-		bytes, err := GetBytes(sources)
-		if err != nil {
-			return nil, fmt.Errorf("problem parsing catalog.json: %+v", err)
-		}
-		sourcesInvocationId := json.Get(bytes, "metadata", "invocation_id").ToString()
-		if dbtResult.InvocationId == "" {
-			dbtResult.InvocationId = sourcesInvocationId
-		}
-		dbtResult.Sources = wrapperspb.String(string(bytes))
-	}
-
-	return dbtResult, nil
-
-}
-
-// 	timeoutCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
-// 	defer cancel()
-
-// 	if dbtResult.Manifest != nil || dbtResult.RunResults != nil || dbtResult.Catalog != nil || dbtResult.Sources != nil {
-// 		_, err := api.DbtClient.PostDbtResult(timeoutCtx, &dbtv1.PostDbtResultRequest{
-// 			DbtResult: dbtResult,
-// 		})
-// 		if err != nil {
-// 			return err
-// 		}
-// 		log("All done!", logrus.InfoLevel)
-// 	} else {
-// 		log("Nothing to upload", logrus.ErrorLevel)
-// 	}
-
-// 	return nil
-// }
