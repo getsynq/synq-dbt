@@ -1,44 +1,42 @@
-# Synq dbt wrapper
+# synq-dbt
 
+synq-dbt is command line tool that executes dbt and uploads dbt artifacts to [Synq](https://app.synq.io).
 
-The present repository contains the source code of the [Synq](https://app.synq.io) dbt wrapper.
-Dbt wrapper is a simple command line tool, that executes dbt and uploads the dbt's manifests to synq.
+**Note: synq-dbt is intended to be used for dbt running on Airflow or similar. If you're dbt Cloud customer, please contact Synq for setup instructions.** 
 
-**Note: This wrapper is only used for locally (Airflow and similar) run dbt. In case you run dbt using DbtCloud please contact us for setup instructions.** 
+### How does it work?
 
-## Documentation
+synq-dbt works in the following steps:
 
-The general documentation of the project, including instructions for installation.
-
-## Arguments
-
-| Environment Variable |                                                   Description                                                   |
-|----------------------|:---------------------------------------------------------------------------------------------------------------:|
-| SYNQ_TOKEN           | Synq token for your dbt integration. You should have already gotten it from our Team. If not, please contact us |
-
-## Getting Started
-
-The command line wrapper is a simple tool, that:
-1) Executes your locally installed dbt and passes all the arguments into the dbt command
+1) Execute your locally installed dbt. Arguments you supply synq-dbt are passes to dbt
 2) Stores the exit code of the dbt command
-3) Reads env `SYNQ_TOKEN` and uploads your `manifest.json`, `run_results.json`, `catalog.json` and `schema.json` from `./target` directory to [Synq](https://app.synq.io)
-4) Returns stored dbt's exit code (Even if the upload fails)
+3) Reads environment variable `SYNQ_TOKEN`
+4) Uploads `manifest.json`, `run_results.json`, `catalog.json` and `schema.json` from `./target` directory to [Synq](https://app.synq.io)
+4) Returns stored dbt's exit code
 
-**Note:** This wrapper is dbt version agnostic. Update dbt as you would normally. The wrapper only executes your dbt as you would in shell.
-In practice, make an ENV called `SYNQ_TOKEN` then your dbt command is just interchanged from `dbt run --models=finance --threads 5` and/or `dbt test --models=reports` to `synq_dbt run --models=finance --threads 5` and/or `synq_dbt test --models=reports`
+**Note:** synq-dbt is dbt version agnostic and works with any version of dbt.
+For example, your current command `dbt run --models=finance --threads 5` becomes `synq-dbt run --models=finance --threads 5` or `dbt test --models=reports` becomes `synq-dbt test --models=reports`
 
 ### Installation
+
+To successfully install synq-dbt you will need the following variables:
+
+| Variable             |                              Description                             |
+|----------------------|:--------------------------------------------------------------------:|
+| SYNQ_TOKEN           | Synq token for your dbt integration you will receive from Synq team. |
+
+## Getting Started
 
 ### Airflow
 There are many ways to run dbt in Airflow environment, we will cover the most used setups in this guide.
 In case none of these options don't work for you, please contact us, we will help you integrate synq into your Airflow.
 
 1) In Airflow UI, go to Environment variables. Create a new ENV called `SYNQ_TOKEN` to token and paste your synq token as a value there.
-2) Depending on your airflow setup, you likely either use [dbt's plugin](https://github.com/gocardless/airflow-dbt) and run that as an DBT*Operator or [DockerOperator](https://airflow.apache.org/docs/apache-airflow-providers-docker/stable/_api/airflow/providers/docker/operators/docker/index.html)
-   - In case you run your dbt inside a DockerOperator [follow these instructions](https://github.com/getsynq/dbt-wrapper#airflow-with-a-docker-runner)
-   - In case you run dbt's airflow plugin [follow these instructions](https://github.com/getsynq/dbt-wrapper#airflow-with-dbt-plugin)
+2) 
+   1) In case you run via a [DockerOperator](https://airflow.apache.org/docs/apache-airflow-providers-docker/stable/_api/airflow/providers/docker/operators/docker/index.html) [follow these instructions](https://github.com/getsynq/synq-dbt#airflow-with-a-docker-runner)
+   2) In case you run dbt's [dbt's plugin](https://github.com/gocardless/airflow-dbt) [follow these instructions](https://github.com/getsynq/synq-dbt#airflow-with-dbt-plugin)
 
-### Airflow with a Docker Runner
+### Airflow with a DockerOperator
 
 **Preflight check**:
 - You have `SYNQ_TOKEN` environment variable set in Airflow UI 
@@ -50,7 +48,7 @@ Simply add these lines to your runner's Dockerfile:
 
 ```dockerfile
 ENV SYNQ_VERSION=v1.1.0
-RUN wget -O /usr/bin/synq_dbt https://github.com/getsynq/dbt-wrapper/releases/download/${SYNQ_VERSION}/cloud-synq-dbt-${SYNQ_VERSION}-linux-amd64
+RUN wget -O /usr/bin/synq_dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/cloud-synq-dbt-${SYNQ_VERSION}-linux-amd64
 RUN chmod +x /usr/bin/synq_dbt
 ```
 
@@ -71,7 +69,7 @@ You're all set!
 
 ### Airflow with DBT Plugin
 
-You will need to install the wrapper into your airflow cluster. You can [follow the instructions in the Intalling on Linux section](https://github.com/getsynq/dbt-wrapper#linux)
+You will need to install the wrapper into your airflow cluster. You can [follow the instructions in the Intalling on Linux section](https://github.com/getsynq/synq-dbt#linux)
 
 
 **Preflight check**:
@@ -98,7 +96,7 @@ To install a released binary to your Docker, add these lines to your Dockerfile
 
 ```dockerfile
 ENV SYNQ_VERSION=v1.1.0
-RUN wget -O /usr/bin/synq_dbt https://github.com/getsynq/dbt-wrapper/releases/download/${SYNQ_VERSION}/cloud-synq-dbt-${SYNQ_VERSION}-linux-amd64
+RUN wget -O /usr/bin/synq_dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/cloud-synq-dbt-${SYNQ_VERSION}-linux-amd64
 RUN chmod +x /usr/bin/synq_dbt
 ```
 
@@ -106,6 +104,6 @@ The `synq_dbt` command then will be available for execution.
 
 ### Linux
 
-1) Go to [releases](https://github.com/getsynq/dbt-wrapper/releases) and download the latest released binary for your architecture.
+1) Go to [releases](https://github.com/getsynq/synq-dbt/releases) and download the latest released binary for your architecture.
 2) Place the binary somewhere in your $PATH. For example `mv synq-dbt-v1.1.0 /usr/local/bin/synq_dbt` 
 3) Make the binary executable `chmod +x /usr/local/bin/synq_dbt`
