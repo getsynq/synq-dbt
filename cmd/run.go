@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 
 	"log"
 
@@ -15,7 +16,15 @@ import (
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
+	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+	SilenceUsage:       true,
 	RunE: func(cmd *cobra.Command, args []string) error {
+
+		// Collect all arguments including flags
+		args = os.Args[1:]
+
+		log.Printf("syn-dbt processing `dbt %s`", strings.Join(args, " "))
+
 		dbtBin := "dbt"
 
 		exitCode, err := command.ExecuteCommand(dbtBin, args...)
