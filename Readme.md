@@ -89,5 +89,5 @@ The `synq-dbt` command then will be available for execution.
 ### Linux
 
 1) Go to [releases](https://github.com/getsynq/synq-dbt/releases) and download the latest released binary for your architecture.
-2) Place the binary in your $PATH. For example `mv synq-dbt-v1.2.1 /usr/local/bin/synq-dbt` 
+2) Place the binary in your $PATH. For example `mv synq-dbt-v1.2.2 /usr/local/bin/synq-dbt` 
 3) Make the binary executable `chmod +x /usr/local/bin/synq-dbt`
