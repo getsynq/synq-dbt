@@ -1,6 +1,7 @@
 package dbt
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -48,6 +49,10 @@ func ReadDbtArtifactsToReq(targetPath string) (*v1.DbtResult, error) {
 			dbtResult.InvocationId = sourcesInvocationId
 		}
 		dbtResult.Sources = wrapperspb.String(string(sources))
+	}
+
+	if manifest != nil || runResults != nil || catalog != nil || sources != nil {
+		return nil, fmt.Errorf("no valid dbt artifacts found in `%s`", targetPath)
 	}
 
 	return dbtResult, nil

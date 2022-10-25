@@ -17,7 +17,37 @@ var (
 	logger = logrus.WithField("app", "synq-dbt")
 )
 
-func CreateDbtServiceClient(url string) (dbtv1.DbtServiceClient, error) {
+type Api struct {
+	client dbtv1.DbtServiceClient
+}
+
+func NewApi(url string) (*Api, error) {
+	client, err := createDbtServiceClient(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Api{
+		client: client,
+	}, nil
+}
+
+func (api *Api) SendRequest(ctx context.Context, dbtArtifacts *v1.DbtResult) error {
+	timeoutCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+
+	_, err := api.client.PostDbtResult(timeoutCtx, &dbtv1.PostDbtResultRequest{
+		DbtResult: dbtArtifacts,
+	})
+
+	return err
+}
+
+//
+// HELPERS
+//
+
+func createDbtServiceClient(url string) (dbtv1.DbtServiceClient, error) {
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
 		return nil, err
@@ -37,39 +67,4 @@ func CreateDbtServiceClient(url string) (dbtv1.DbtServiceClient, error) {
 	}
 
 	return dbtv1.NewDbtServiceClient(conn), nil
-}
-
-type Api struct {
-	client dbtv1.DbtServiceClient
-}
-
-func NewApi(url string) (*Api, error) {
-	client, err := CreateDbtServiceClient(url)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Api{
-		client: client,
-	}, nil
-}
-
-func (api *Api) SendRequest(ctx context.Context, dbtArtifacts *v1.DbtResult) error {
-
-	timeoutCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
-	defer cancel()
-
-	if dbtArtifacts.Manifest != nil || dbtArtifacts.RunResults != nil || dbtArtifacts.Catalog != nil || dbtArtifacts.Sources != nil {
-		_, err := api.client.PostDbtResult(timeoutCtx, &dbtv1.PostDbtResultRequest{
-			DbtResult: dbtArtifacts,
-		})
-		if err != nil {
-			return err
-		}
-		logger.Log(logrus.InfoLevel, "All done!")
-	} else {
-		logger.Log(logrus.ErrorLevel, "Nothing to upload")
-	}
-
-	return nil
 }
