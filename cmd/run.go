@@ -17,7 +17,7 @@ import (
 var runCmd = &cobra.Command{
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 	SilenceUsage:       true,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 
 		// Collect all arguments including flags
 		args = os.Args[1:]
@@ -27,21 +27,17 @@ var runCmd = &cobra.Command{
 		dbtBin := "dbt"
 
 		exitCode, err := command.ExecuteCommand(dbtBin, args...)
-
 		if err != nil {
 			os.Exit(exitCode)
-			return nil
 		}
 
 		if err := uploadArtifactsToSynq(cmd.Context()); err != nil {
 			logrus.Printf("syn-dbt failed: %s", err.Error())
 		}
 
-		return nil
+		os.Exit(exitCode)
 	},
 }
-
-func init() {}
 
 func uploadArtifactsToSynq(ctx context.Context) error {
 	targetDirectory := "target"

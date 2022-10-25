@@ -28,14 +28,14 @@ func ExecuteCommand(cmdName string, args ...string) (int, error) {
 	stdOutScanner := bufio.NewScanner(stdOutReader)
 	go func() {
 		for stdOutScanner.Scan() {
-			fmt.Println(stdOutScanner.Text())
+			fmt.Fprintln(os.Stdout, stdOutScanner.Text())
 		}
 	}()
 
 	stdErrScanner := bufio.NewScanner(stdErrReader)
 	go func() {
 		for stdErrScanner.Scan() {
-			fmt.Println(stdErrScanner.Text())
+			fmt.Fprintln(os.Stderr, stdErrScanner.Text())
 		}
 	}()
 
