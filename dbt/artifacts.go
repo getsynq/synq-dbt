@@ -16,11 +16,9 @@ var (
 func ReadDbtArtifactsToReq(targetPath string) (*v1.DbtResult, error) {
 	dbtResult := &v1.DbtResult{}
 
-	var manifestInvocationId string
-
 	manifest, err := os.ReadFile(filepath.Join(targetPath, "manifest.json"))
 	if err == nil {
-		manifestInvocationId = json.Get(manifest, "metadata", "invocation_id").ToString()
+		manifestInvocationId := json.Get(manifest, "metadata", "invocation_id").ToString()
 		dbtResult.InvocationId = manifestInvocationId
 		dbtResult.Manifest = wrapperspb.String(string(manifest))
 	}
