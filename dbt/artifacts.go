@@ -19,13 +19,13 @@ func ReadDbtArtifactsToReq(targetPath string) (*v1.DbtResult, error) {
 	dbtResult := &v1.DbtResult{}
 
 	manifest, invocationId, err := readArtifact(targetPath, "manifest.json")
-	if err != nil {
+	if err == nil {
 		dbtResult.InvocationId = invocationId
 		dbtResult.Manifest = wrapperspb.String(manifest)
 	}
 
 	runResults, invocationId, err := readArtifact(targetPath, "run_results.json")
-	if err != nil {
+	if err == nil {
 		if dbtResult.InvocationId == "" {
 			dbtResult.InvocationId = invocationId
 		}
@@ -34,7 +34,7 @@ func ReadDbtArtifactsToReq(targetPath string) (*v1.DbtResult, error) {
 	}
 
 	catalog, invocationId, err := readArtifact(targetPath, "catalog.json")
-	if err != nil {
+	if err == nil {
 		if dbtResult.InvocationId == "" {
 			dbtResult.InvocationId = invocationId
 		}
@@ -43,7 +43,7 @@ func ReadDbtArtifactsToReq(targetPath string) (*v1.DbtResult, error) {
 	}
 
 	sources, invocationId, err := readArtifact(targetPath, "sources.json")
-	if err != nil {
+	if err == nil {
 		if dbtResult.InvocationId == "" {
 			dbtResult.InvocationId = invocationId
 		}
