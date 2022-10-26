@@ -116,7 +116,7 @@ The `synq-dbt` command is available for execution. :tada:
 
 ## OSX
 
-OSX version is primarily used for testing, by manually triggering `synq-ctl`. You can use it 
+OSX version is primarily used for testing, by manually triggering `synq-ctl`. 
 
 1) Execute the following shell commands to download the latest version of `synq-dbt`
 
@@ -157,6 +157,8 @@ Core:
 ```
 
 You're all set! :tada:
+
+**Note: Note when testing `synq-dbt` locally on your mac, it is recommended you delete `target/` folder before you execute `synq-dbt` so it doesn't pickup old dbt artifacts.**
 
 # FAQ
 
