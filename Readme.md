@@ -6,7 +6,16 @@ synq-dbt is command line tool that executes dbt and uploads dbt artifacts to [Sy
 
 # How does it work?
 
-synq-dbt is dbt version agnostic and works with any version of dbt in the following steps:
+`synq-dbt` wraps `dbt` command. After execution of `dbt` it collects [dbt artifacts](https://docs.getdbt.com/reference/artifacts/dbt-artifacts) that allow Synq to understand structure and status of your dbt project. We collect the following:
+
+- `manifest.json` — to understand the structure of the dbt project
+- `run_results.json` — to understand executions status
+- `catalog.json` — to infer complete schema of underlying data warehouse tables
+- `sources.json` — to capture dbt source freshness
+
+All the data is presented in the [Cloud Synq User Interface](https://app.synq.io).
+
+`synq-dbt` is dbt version agnostic and works with the version of dbt you have installed on your system. It runs in the following steps:
 
 1) Execute your locally installed `dbt`. Arguments you supply to `synq-dbt` are passes to `dbt`. For example, your current command `dbt run --select finance --threads 5` becomes `synq-dbt run --select finance --threads 5` or `dbt test --select reports` becomes `synq-dbt test --select reports`.
 2) Stores the exit code of the dbt command.
@@ -162,7 +171,7 @@ You're all set! :tada:
 
 # FAQ
 
-**Q:** What requests does `synq-dbt` do?
+### **Q:** What requests does `synq-dbt` do?
 
 **A:** Every time it executes `synq-dbt` does one gRPC request to Synq servers. The payload of the request contains dbt artifacts and authentication token that server uses to verify your data.
 
@@ -170,7 +179,7 @@ You're all set! :tada:
 
 ##
 
-**Q:** What is the size of the payload?
+### **Q:** What is the size of the payload?
 
 **A:** Since most of the data is text, total size of payload is roughly equivalent to sum of sizes of dbt artifacts. `dbt_manifest.json` is usually the largest and the final size of the request depends on size of your project, ranging from few MBs to higher tens of MBs typically.
 
@@ -178,6 +187,6 @@ You're all set! :tada:
 
 ##
 
-**Q:** How quickly does data appear in Synq UI?
+### **Q:** How quickly does data appear in Synq UI?
 
 **A:** Unless our system experiences unusual traffic spike, data should be available in UI within a few minutes.
