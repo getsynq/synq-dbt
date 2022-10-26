@@ -104,6 +104,26 @@ mv synq-dbt /usr/local/bin/synq-dbt
 
 The `synq-dbt` command is available for execution. :tada:
 
+## OSX
+
+OSX version is primarily used if you want to test `synq-ctl` locally first as you can use it on your Mac to trigger manual runs.
+
+1) Execute the following shell commands to download the latest version of `synq-dbt`
+
+```console
+export SYNQ_VERSION=v1.2.2
+wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-arm64-darwin
+chmod +x ./synq-dbt
+```
+
+2) Move the `synq-dbt` binary in your $PATH
+
+```console
+mv synq-dbt /usr/local/bin/synq-dbt
+```
+
+The `synq-dbt` command is available for execution. :tada:
+
 # FAQ
 
 **Q:** What requests does `synq-dbt` do?
@@ -119,3 +139,9 @@ The `synq-dbt` command is available for execution. :tada:
 **A:** Since most of the data is text, total size of payload is roughly equivalent to sum of sizes of dbt artifacts. `dbt_manifest.json` is usually the largest and the final size of the request depends on size of your project, ranging from few MBs to higher tens of MBs typically.
 
 **Note: Depending on your setup, you might have to allow large payloads in your network firewall.**
+
+##
+
+**Q:** How quickly does data appear in Synq UI?
+
+**A:** Unless our system experiences unusual traffic spike, data should be available in UI within a few minutes.
