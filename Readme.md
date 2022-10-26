@@ -116,7 +116,7 @@ The `synq-dbt` command is available for execution. :tada:
 
 ## OSX
 
-OSX version is primarily used if you want to test `synq-ctl` locally first as you can use it on your Mac to trigger manual runs.
+OSX version is primarily used for testing, by manually triggering `synq-ctl`. You can use it 
 
 1) Execute the following shell commands to download the latest version of `synq-dbt`
 
@@ -132,7 +132,25 @@ chmod +x ./synq-dbt
 mv synq-dbt /usr/local/bin/synq-dbt
 ```
 
-The `synq-dbt` command is available for execution. :tada:
+3) Check current version of `dbt` via `synq-dbt` as follows:
+
+```console
+$ synq-dbt --version
+```
+
+will result in:
+
+```console
+07:04:54  synq-dbt failed: missing SYNQ_TOKEN variable
+07:04:54  synq-dbt processing `dbt --version`
+Core:
+  - installed: 1.2.0
+  - latest:    1.3.0 - Update available!
+
+...
+```
+
+You're all set! :tada:
 
 # FAQ
 
