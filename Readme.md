@@ -43,7 +43,7 @@ RUN chmod +x /usr/bin/synq-dbt
 
 3) Change Docker container entrypoint (usually last line in Dockerfile) from `dbt` to `synq-dbt` OR change the command in the DbtOperator itself in your Airflow's Dag from `dbt` to `synq-dbt`
 
-In the case of DbtOperator command change, the result would look as follows:
+In the case of `KubernetesPodOperator` change, the result should for example look as follows:
 
 ```python
 KubernetesPodOperator(
@@ -59,11 +59,21 @@ You're all set! :tada:
 
 1) In Airflow UI, go to Environment variables. Create a new ENV variable called `SYNQ_TOKEN` with Synq token as a value.
 
-2) Install `synq-dbt` into your airflow cluster. You can [follow the instructions in the Intalling on Linux section](https://github.com/getsynq/synq-dbt#linux)
+2) Execute the following shell commands to download the latest version of `synq-dbt`
 
-3) Every `Dbt*Operator` supports a `bin` argument which specifies, what binary the operator executes.
+```console
+export SYNQ_VERSION=v1.2.2
+wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-amd64-linux
+chmod +x ./synq-dbt
+```
 
-The result should look as follows:
+3) Move the `synq-dbt` binary in your $PATH
+
+```console
+mv synq-dbt /usr/local/bin/synq-dbt
+```
+
+3) Change your `Dbt*Operator`s `bin` argument as follows:
 
 ```python
   dbt_run = DbtRunOperator(
