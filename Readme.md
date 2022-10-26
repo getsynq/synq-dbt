@@ -171,6 +171,10 @@ You're all set! :tada:
 
 # FAQ
 
+### **Q:** What version of `dbt` does `synq-dbt` run?
+
+**A:** `synq-dbt` is `dbt` version agnostic and **works with the version of dbt you have installed on your system**. 
+
 ### **Q:** What requests does `synq-dbt` do?
 
 **A:** Every time it executes `synq-dbt` does one gRPC request to Synq servers. The payload of the request contains dbt artifacts and authentication token that server uses to verify your data.
