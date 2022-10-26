@@ -57,6 +57,9 @@ In the case of `KubernetesPodOperator` change, the result should for example loo
 ```python
 KubernetesPodOperator(
     ...
+    env_vars={
+        "SYNQ_TOKEN": Variable.get("SYNQ_TOKEN")
+    },
     cmds=["synq-dbt"],
     arguments=["test"],
 )
