@@ -132,16 +132,22 @@ chmod +x ./synq-dbt
 mv synq-dbt /usr/local/bin/synq-dbt
 ```
 
-3) Check current version of `dbt` via `synq-dbt` as follows:
+3) Export your `SYNQ_TOKEN` to the current shell
 
 ```console
-$ synq-dbt --version
+export SYNQ_TOKEN=<your-token>
+```
+
+
+4) Check current version of `dbt` via `synq-dbt` as follows:
+
+```console
+synq-dbt --version
 ```
 
 will result in:
 
 ```console
-07:04:54  synq-dbt failed: missing SYNQ_TOKEN variable
 07:04:54  synq-dbt processing `dbt --version`
 Core:
   - installed: 1.2.0
