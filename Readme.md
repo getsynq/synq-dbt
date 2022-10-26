@@ -89,6 +89,9 @@ mv synq-dbt /usr/local/bin/synq-dbt
 
 ```python
   dbt_run = DbtRunOperator(
+    env={
+        "SYNQ_TOKEN": Variable.get("SYNQ_TOKEN")
+    },
     bin='synq-dbt',
     ...
   )
