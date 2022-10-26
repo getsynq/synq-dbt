@@ -84,11 +84,11 @@ RUN wget -O /usr/bin/synq-dbt https://github.com/getsynq/synq-dbt/releases/downl
 RUN chmod +x /usr/bin/synq-dbt
 ```
 
-The `synq-dbt` command then will be available for execution.
+The `synq-dbt` command is available for execution. :tada:
 
 ## Linux
 
-1) Execute the following shell commands:
+1) Execute the following shell commands to download the latest version of `synq-dbt`
 
 ```console
 export SYNQ_VERSION=v1.2.2
@@ -96,10 +96,26 @@ wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_
 chmod +x ./synq-dbt
 ```
 
-2) Move the `synq-dbt` binary in your $PATH. 
+2) Move the `synq-dbt` binary in your $PATH
 
 ```console
 mv synq-dbt /usr/local/bin/synq-dbt
 ```
 
-The `synq-dbt` command then will be available for execution. 
+The `synq-dbt` command is available for execution. :tada:
+
+# FAQ
+
+**Q:** What requests does `synq-dbt` do?
+
+**A:** Every time it executes `synq-dbt` does one gRPC request to Synq servers. The payload of the request contains dbt artifacts and authentication token that server uses to verify your data.
+
+**Note: Depending on your setup, you might have to allow egress traffic in your network firewall to `dbt-uploader-xwpzuoapgq-lm.a.run.app:443`.**
+
+##
+
+**Q:** What is the size of the payload?
+
+**A:** Since most of the data is text, total size of payload is roughly equivalent to sum of sizes of dbt artifacts. `dbt_manifest.json` is usually the largest and the final size of the request depends on size of your project, ranging from few MBs to higher tens of MBs typically.
+
+**Note: Depending on your setup, you might have to allow large payloads in your network firewall.**
