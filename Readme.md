@@ -175,6 +175,10 @@ You're all set! :tada:
 
 **A:** `synq-dbt` is `dbt` version agnostic and **works with the version of dbt you have installed on your system**. 
 
+##
+
+
+
 ### **Q:** What requests does `synq-dbt` do?
 
 **A:** Every time it executes `synq-dbt` does one gRPC request to Synq servers. The payload of the request contains dbt artifacts and authentication token that server uses to verify your data.
@@ -183,6 +187,8 @@ You're all set! :tada:
 
 ##
 
+
+
 ### **Q:** What is the size of the payload?
 
 **A:** Since most of the data is text, total size of payload is roughly equivalent to sum of sizes of dbt artifacts. `dbt_manifest.json` is usually the largest and the final size of the request depends on size of your project, ranging from few MBs to higher tens of MBs typically.
@@ -190,6 +196,8 @@ You're all set! :tada:
 **Note: Depending on your setup, you might have to allow large payloads in your network firewall.**
 
 ##
+
+
 
 ### **Q:** How quickly does data appear in Synq UI?
 
