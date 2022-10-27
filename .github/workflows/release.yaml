@@ -27,6 +27,7 @@ jobs:
     - name: Build
       run: |
         go get
+        go generate
         GOOS=darwin GOARCH=arm64 go build -o synq-dbt-arm64-darwin main.go
         GOOS=linux GOARCH=amd64 go build -o synq-dbt-amd64-linux main.go
         GOOS=windows GOARCH=amd64 go build -o synq-dbt-amd64-windows.exe main.go

@@ -17,7 +17,6 @@ var runCmd = &cobra.Command{
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 	SilenceUsage:       true,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		// Load configuration
 		token, ok := os.LookupEnv("SYNQ_TOKEN")
 		if !ok {
@@ -46,7 +45,7 @@ var runCmd = &cobra.Command{
 
 		exitCode, err := command.ExecuteCommand(dbtBin, args...)
 		if err != nil {
-			os.Exit(exitCode)
+			logrus.Printf("synq-dbt execution of dbt finished with exit code %d, %s", exitCode, err.Error())
 		}
 
 		if token != "" {
