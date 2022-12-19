@@ -87,14 +87,14 @@ mv synq-dbt /usr/local/bin/synq-dbt
 
 3) Unfortunatelly, Dbt*Operators haven't been released to pip for quite some time and [a pull-request that added **env** argument was not released to pip yet](https://github.com/gocardless/airflow-dbt/pull/60) 
 In case you build the airflow-dbt locally
-Change your `Dbt*Operator`s `bin` argument as follows:
+Change your `Dbt*Operator`s `dbt_bin` argument as follows:
 
 ```python
   dbt_run = DbtRunOperator(
     env={
         "SYNQ_TOKEN": Variable.get("SYNQ_TOKEN")
     },
-    bin='synq-dbt',
+    dbt_bin='synq-dbt',
     ...
   )
 ```
