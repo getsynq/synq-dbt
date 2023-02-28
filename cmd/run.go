@@ -59,6 +59,7 @@ var runCmd = &cobra.Command{
 			dbtResult.EnvVars = collectEnvVars()
 			dbtResult.UploaderVersion = build.Version
 			dbtResult.UploaderBuildTime = build.Time
+			dbtResult.Args = args
 
 			if err := uploadArtifactsToSynq(cmd.Context(), dbtResult, token, url); err != nil {
 				logrus.Printf("synq-dbt failed: %s", err.Error())
