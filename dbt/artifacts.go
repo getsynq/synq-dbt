@@ -1,7 +1,6 @@
 package dbt
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -15,7 +14,7 @@ var (
 	json = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
-func ReadDbtArtifactsToReq(targetPath string) (*v1.DbtResult, error) {
+func CollectDbtArtifacts(targetPath string) *v1.DbtResult {
 	dbtResult := &v1.DbtResult{}
 
 	manifest, invocationId, err := readArtifact(targetPath, "manifest.json")
@@ -51,11 +50,7 @@ func ReadDbtArtifactsToReq(targetPath string) (*v1.DbtResult, error) {
 		dbtResult.Sources = wrapperspb.String(sources)
 	}
 
-	if manifest == "" && runResults == "" && catalog == "" && sources == "" {
-		return nil, fmt.Errorf("no valid dbt artifacts found in `%s`", targetPath)
-	}
-
-	return dbtResult, nil
+	return dbtResult
 }
 
 func readArtifact(directory, name string) (string, string, error) {
