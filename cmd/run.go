@@ -4,6 +4,7 @@ import (
 	"context"
 	v1 "github.com/getsynq/cloud/api/clients/v1"
 	"github.com/getsynq/synq-dbt/build"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 	"os"
 	"strings"
 
@@ -60,6 +61,7 @@ var runCmd = &cobra.Command{
 			dbtResult.UploaderVersion = build.Version
 			dbtResult.UploaderBuildTime = build.Time
 			dbtResult.Args = args
+			dbtResult.ExitCode = wrapperspb.Int32(int32(exitCode))
 
 			if err := uploadArtifactsToSynq(cmd.Context(), dbtResult, token, url); err != nil {
 				logrus.Printf("synq-dbt failed: %s", err.Error())
