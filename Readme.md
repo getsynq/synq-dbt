@@ -196,7 +196,7 @@ You're all set! :tada:
 
 **A:** Every time it executes `synq-dbt` does one gRPC request to Synq servers. The payload of the request contains dbt artifacts and authentication token that server uses to verify your data.
 
-**Note: Depending on your setup, you might have to allow egress traffic in your network firewall to `dbt-uploader-xwpzuoapgq-lm.a.run.app:443`.**
+**Note: Depending on your setup, you might have to allow egress traffic in your network firewall to `dbtapi.synq.io:443`.**
 
 ##
 

@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"context"
+	"os"
+	"strings"
+
 	v1 "github.com/getsynq/cloud/api/clients/v1"
 	"github.com/getsynq/synq-dbt/build"
 	"google.golang.org/protobuf/types/known/wrapperspb"
-	"os"
-	"strings"
 
 	"github.com/getsynq/synq-dbt/command"
 	"github.com/getsynq/synq-dbt/dbt"
@@ -28,7 +29,7 @@ var runCmd = &cobra.Command{
 
 		url, ok := os.LookupEnv("SYNQ_UPLOAD_URL")
 		if !ok {
-			url = "dbt-uploader-xwpzuoapgq-lm.a.run.app:443"
+			url = "dbtapi.synq.io:443"
 		}
 
 		targetDirectory, ok := os.LookupEnv("SYNQ_TARGET_DIR")
