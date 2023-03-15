@@ -45,7 +45,7 @@ In case none of these works for you, please contact us.
 Add the following lines to your runner's Dockerfile to install `synq-dbt`:
 
 ```dockerfile
-ENV SYNQ_VERSION=v1.2.3
+ENV SYNQ_VERSION=v1.4.0
 RUN wget -O /usr/bin/synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-amd64-linux
 RUN chmod +x /usr/bin/synq-dbt
 ```
@@ -74,7 +74,7 @@ You're all set! :tada:
 2) Execute the following shell commands to download the latest version of `synq-dbt`
 
 ```console
-export SYNQ_VERSION=v1.2.3
+export SYNQ_VERSION=v1.4.0
 wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-amd64-linux
 chmod +x ./synq-dbt
 ```
@@ -111,7 +111,7 @@ You're all set! :tada:
 Add the following lines to your Dockerfile:
 
 ```dockerfile
-ENV SYNQ_VERSION=v1.2.3
+ENV SYNQ_VERSION=v1.4.0
 RUN wget -O /usr/bin/synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-amd64-linux
 RUN chmod +x /usr/bin/synq-dbt
 ```
@@ -123,7 +123,7 @@ The `synq-dbt` command is available for execution. :tada:
 1) Execute the following shell commands to download the latest version of `synq-dbt`
 
 ```console
-export SYNQ_VERSION=v1.2.3
+export SYNQ_VERSION=v1.4.0
 wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-amd64-linux
 chmod +x ./synq-dbt
 ```
@@ -143,7 +143,7 @@ OSX version is primarily used for testing, by manually triggering `synq-ctl`.
 1) Execute the following shell commands to download the latest version of `synq-dbt`
 
 ```console
-export SYNQ_VERSION=v1.2.3
+export SYNQ_VERSION=v1.4.0
 wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-arm64-darwin
 chmod +x ./synq-dbt
 ```
