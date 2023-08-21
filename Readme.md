@@ -2,7 +2,7 @@
 
 synq-dbt is command line tool that executes dbt and uploads dbt artifacts to [Synq](https://app.synq.io).
 
-**Note: synq-dbt is intended to be used for dbt running on Airflow or similar. If you're dbt Cloud customer, please contact Synq for setup instructions.** 
+**Note: synq-dbt is intended to be used for dbt running on Airflow or similar. If you're a dbt Cloud customer, you can integrate you account within Synq by going to Settings -> Integrations -> Add Integration -> dbt Cloud.** 
 
 # How does it work?
 
