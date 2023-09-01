@@ -25,7 +25,7 @@ All the data is presented in the [Cloud Synq User Interface](https://app.synq.io
 
 # Installation
 
-To successfully install `synq-dbt` you will need `SYNQ_TOKEN` secret, that you receive from Synq team. It should be treated as a secret as it allows Synq to identify you as customer to associate uploaded data with your workspace.
+To successfully install `synq-dbt` you will need `SYNQ_TOKEN` secret, that you generate in your Synq account when integrating with dbt Self Hosted. Reach out to the team if you have any questions. It should be treated as a secret as it allows Synq to identify you as customer to associate uploaded data with your workspace.
 
 ## Airflow
 
