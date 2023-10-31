@@ -182,6 +182,25 @@ You're all set! :tada:
 
 **Note: Note when testing `synq-dbt` locally on your mac, it is recommended you delete `target/` folder before you execute `synq-dbt` so it doesn't pickup old dbt artifacts.**
 
+## Dagster
+1) In the `.env` file in your root directory, create a variable called `SYNQ_TOKEN` with Synq token as a value (i.e. `SYNQ_TOKEN=<TOKEN_VALUE>`).
+2) In your `definitions.py` file, update your dbt resources definition to use `synq-dbt`
+
+```python
+resources={
+        "dbt": DbtCliResource(dbt_executable='synq-dbt', project_dir=os.fspath(dbt_project_dir)),
+}
+```
+3) By default, Dagster creates a dynamic path for the dbt artifacts but Synq always looks in the root target folder. In your `assets.py` file, update the `target_path` so that artifacts are stored in the root target folder
+
+```python
+@dbt_assets(manifest=dbt_manifest_path)
+def jaffle_shop_dbt_assets(context: AssetExecutionContext, dbt: DbtCliResource):
+    dbt_target_path = Path('target')
+    yield from dbt.cli(["build"], target_path=dbt_target_path, context=context).stream()
+```
+
+
 # FAQ
 
 ### **Q:** What version of `dbt` does `synq-dbt` run?
