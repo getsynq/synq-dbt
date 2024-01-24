@@ -23,8 +23,8 @@ var runCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Load configuration
 		token, ok := os.LookupEnv("SYNQ_TOKEN")
-		if !ok {
-			logrus.Printf("synq-dbt failed: missing SYNQ_TOKEN variable")
+		if !ok || token == "" {
+			logrus.Warnf("synq-dbt failed: missing SYNQ_TOKEN variable")
 		}
 
 		url, ok := os.LookupEnv("SYNQ_UPLOAD_URL")
@@ -49,7 +49,7 @@ var runCmd = &cobra.Command{
 
 		exitCode, stdOut, stdErr, err := command.ExecuteCommand(dbtBin, args...)
 		if err != nil {
-			logrus.Printf("synq-dbt execution of dbt finished with exit code %d, %s", exitCode, err.Error())
+			logrus.Warnf("synq-dbt execution of dbt finished with exit code %d, %s", exitCode, err.Error())
 		}
 
 		if token != "" {
@@ -65,8 +65,10 @@ var runCmd = &cobra.Command{
 			dbtResult.ExitCode = wrapperspb.Int32(int32(exitCode))
 
 			if err := uploadArtifactsToSynq(cmd.Context(), dbtResult, token, url); err != nil {
-				logrus.Printf("synq-dbt failed: %s", err.Error())
+				logrus.Warnf("synq-dbt failed: %s", err.Error())
 			}
+
+			logrus.Infof("synq-dbt processing successfully finished", targetDirectory, url)
 		}
 
 		os.Exit(exitCode)
