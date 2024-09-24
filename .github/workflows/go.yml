@@ -21,10 +21,10 @@ jobs:
       - name: Build
         run: |
           go generate
-          GOOS=darwin CGO_ENABLED=0 GOARCH=amd64 go build -v main.go
-          GOOS=darwin CGO_ENABLED=0 GOARCH=arm64 go build -v main.go
-          GOOS=linux CGO_ENABLED=0 GOARCH=amd64 go build -v main.go
-          GOOS=linux CGO_ENABLED=0 GOARCH=arm64 go build -v main.go
+          GOOS=darwin CGO_ENABLED=0 GOARCH=amd64 go build main.go
+          GOOS=darwin CGO_ENABLED=0 GOARCH=arm64 go build main.go
+          GOOS=linux CGO_ENABLED=0 GOARCH=amd64 go build main.go
+          GOOS=linux CGO_ENABLED=0 GOARCH=arm64 go build main.go
 
       - name: Test
         run: go test -v ./...
