@@ -1,5 +1,10 @@
 package cmd
 
-func Execute() {
-	runCmd.Execute()
+import (
+	"context"
+)
+
+func Execute(ctx context.Context) {
+	runCmd.SetContext(ctx)
+	_ = runCmd.Execute()
 }
