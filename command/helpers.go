@@ -3,18 +3,36 @@ package command
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
+	"syscall"
 )
 
 var (
 	exitError *exec.ExitError
 )
 
-func ExecuteCommand(cmdName string, args ...string) (exitCode int, stdOut []byte, stdErr []byte, err error) {
-	cmd := exec.Command(cmdName, args...)
+func ExecuteCommand(ctx context.Context, cmdName string, args ...string) (exitCode int, stdOut []byte, stdErr []byte, err error) {
+	cmd := exec.CommandContext(ctx, cmdName, args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.Cancel = func() error {
+		logrus.Println("cancelling subcommand", cmd.Process.Pid)
+		var errors []error
+		if err := cmd.Process.Kill(); err != nil {
+			errors = append(errors, err)
+		}
+		if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
+			errors = append(errors, err)
+		}
+		if len(errors) > 0 {
+			return fmt.Errorf("error cancelling pid=%d, errors=%v", cmd.Process.Pid, errors)
+		}
+		return nil
+	}
 	stdOutReader, err := cmd.StdoutPipe()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error creating StdoutPipe for Cmd", err)

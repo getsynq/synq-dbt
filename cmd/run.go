@@ -47,7 +47,7 @@ var runCmd = &cobra.Command{
 
 		logrus.Infof("synq-dbt processing `%s %s`", dbtBin, strings.Join(args, " "))
 
-		exitCode, stdOut, stdErr, err := command.ExecuteCommand(dbtBin, args...)
+		exitCode, stdOut, stdErr, err := command.ExecuteCommand(cmd.Context(), dbtBin, args...)
 		if err != nil {
 			logrus.Warnf("synq-dbt execution of dbt finished with exit code %d, %s", exitCode, err.Error())
 		}
