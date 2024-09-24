@@ -66,9 +66,9 @@ var runCmd = &cobra.Command{
 
 			if err := uploadArtifactsToSynq(cmd.Context(), dbtResult, token, url); err != nil {
 				logrus.Warnf("synq-dbt failed: %s", err.Error())
+			} else {
+				logrus.Info("synq-dbt processing successfully finished")
 			}
-
-			logrus.Infof("synq-dbt processing successfully finished", targetDirectory, url)
 		}
 
 		os.Exit(exitCode)
