@@ -18,7 +18,10 @@ var (
 
 func ExecuteCommand(ctx context.Context, cmdName string, args ...string) (exitCode int, stdOut []byte, stdErr []byte, err error) {
 	cmd := exec.CommandContext(ctx, cmdName, args...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+		Pgid:    syscall.Getpgrp(),
+	}
 	cmd.Cancel = func() error {
 		logrus.Println("cancelling subcommand", cmd.Process.Pid)
 		var errors []error
