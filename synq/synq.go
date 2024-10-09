@@ -40,7 +40,7 @@ func UploadMetadata(ctx context.Context, output *ingestdbtv1.IngestInvocationReq
 	if err != nil {
 		return err
 	}
-	logrus.Infof("Metadata uploaded successfully: %s", resp.String())
+	logrus.Printf("metadata uploaded successfully: %s", resp.String())
 	return nil
 }
 

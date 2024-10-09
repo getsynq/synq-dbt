@@ -37,5 +37,5 @@ var uploadRunCmd = &cobra.Command{
 }
 
 func init() {
-	runCmd.AddCommand(uploadRunCmd)
+	//runCmd.AddCommand(uploadRunCmd)
 }
