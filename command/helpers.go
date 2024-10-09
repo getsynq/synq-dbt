@@ -77,6 +77,9 @@ func ExecuteCommand(ctx context.Context, cmdName string, args ...string) (exitCo
 	if err = cmd.Start(); err != nil {
 		return 1, outb.Bytes(), errb.Bytes(), err
 	}
+	if cmd.Process != nil {
+		logrus.Printf("subcommand pid=%d", cmd.Process.Pid)
+	}
 
 	err = cmd.Wait()
 	if err != nil {

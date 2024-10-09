@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="synq-dbt" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="synq-dbt" />
+    <working_directory value="$PROJECT_DIR$/../synq-dbt" />
+    <envs>
+      <env name="SYNQ_TOKEN" value="invalid-token" />
+      <env name="SYNQ_DBT_BIN" value="./forever.sh" />
+    </envs>
+    <kind value="PACKAGE" />
+    <package value="github.com/getsynq/synq-dbt" />
+    <directory value="$PROJECT_DIR$" />
+    <method v="2" />
+  </configuration>
+</component>

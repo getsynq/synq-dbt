@@ -38,14 +38,15 @@ var runCmd = &cobra.Command{
 		}
 
 		dbtBin, ok := os.LookupEnv("SYNQ_DBT_BIN")
-		if !ok {
+		dbtBin = strings.TrimSpace(dbtBin)
+		if !ok || dbtBin == "" {
 			dbtBin = "dbt"
 		}
 
 		// Collect all arguments including flags
 		args = os.Args[1:]
 
-		logrus.Infof("synq-dbt processing `%s %s`", dbtBin, strings.Join(args, " "))
+		logrus.Infof("synq-dbt processing `%s`", strings.Join(append([]string{dbtBin}, args...), " "))
 
 		exitCode, stdOut, stdErr, err := command.ExecuteCommand(cmd.Context(), dbtBin, args...)
 		if err != nil {

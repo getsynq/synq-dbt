@@ -34,7 +34,7 @@ func main() {
 		LogFormat:       "%time%  %msg%\n",
 	})
 
-	logrus.Printf("synq-dbt %s (%s) started", strings.TrimSpace(build.Version), strings.TrimSpace(build.Time))
+	logrus.Printf("synq-dbt %s (%s) started (pid %d pgrp %d ppid %d)", strings.TrimSpace(build.Version), strings.TrimSpace(build.Time), os.Getpid(), syscall.Getpgrp(), syscall.Getppid())
 
 	cmd.Execute(ctx)
 }
