@@ -12,7 +12,7 @@ var SynqApiTokenFlag string
 var DbtLogFile string
 
 var uploadRunCmd = &cobra.Command{
-	Use:   "upload_artifacts",
+	Use:   "synq_upload_artifacts",
 	Short: "Sends to SYNQ content of dbt artifacts",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Load configuration

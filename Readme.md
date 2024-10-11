@@ -27,7 +27,7 @@ All the data is presented in the [SYNQ](https://www.synq.io).
 
 # Uploading already existent artifacts
 
-It is possible to upload artifacts that have already been generated. In that case, you can use `synq-dbt upload_artifacts` command to upload artifacts to SYNQ.
+It is possible to upload artifacts that have already been generated. In that case, you can use `synq-dbt synq_upload_artifacts` command to upload artifacts to SYNQ.
 
 ```shell
 
@@ -36,14 +36,14 @@ wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_
 chmod +x ./synq-dbt
 
 export SYNQ_TOKEN=<your-token>
-./synq-dbt upload_artifacts
+./synq-dbt synq_upload_artifacts
 ```
 
 It is possible to include in the uploaded request logs of dbt execution, to do that you need to generate dbt logs to a file and then point synq-dbt to that file.
 
 ```shell
 dbt build | tee dbt.log
-./synq-dbt upload_artifacts --dbt-log-file dbt.log
+./synq-dbt synq_upload_artifacts --dbt-log-file dbt.log
 
 ```
 
