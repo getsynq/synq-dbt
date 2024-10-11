@@ -89,8 +89,9 @@ func uploadArtifacts(ctx context.Context, dbtResult *v1.DbtResult, token string,
 
 	var err error
 	useSYNQApiV2, _ := strconv.ParseBool(os.Getenv("SYNQ_API_V2"))
+	useSYNQApiV2 = useSYNQApiV2 || strings.HasPrefix(token, "st-")
 	if useSYNQApiV2 {
-		logrus.Infof("synq-dbt processing `%s`, uploading to `%s`", targetDirectory, synqV2ApiEndpoint)
+		logrus.Infof("synq-dbt processing `%s`, uploading to `%s` using v2 API", targetDirectory, synqV2ApiEndpoint)
 		err = uploadArtifactsToSYNQV2(ctx, dbtResult, token, synqV2ApiEndpoint)
 	} else {
 		logrus.Infof("synq-dbt processing `%s`, uploading to `%s`", targetDirectory, synqV1ApiEndpoint)
