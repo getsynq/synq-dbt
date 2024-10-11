@@ -8,13 +8,19 @@ import (
 	"os"
 )
 
+var SynqApiTokenFlag string
+var DbtLogFile string
+
 var uploadRunCmd = &cobra.Command{
 	Use:   "upload_artifacts",
 	Short: "Sends to SYNQ content of dbt artifacts",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Load configuration
-		token, ok := os.LookupEnv("SYNQ_TOKEN")
-		if !ok || token == "" {
+		token := os.Getenv("SYNQ_TOKEN")
+		if len(SynqApiTokenFlag) > 0 {
+			token = SynqApiTokenFlag
+		}
+		if token == "" {
 			logrus.Warnf("synq-dbt failed: missing SYNQ_TOKEN variable")
 			return
 		}
@@ -24,18 +30,23 @@ var uploadRunCmd = &cobra.Command{
 			targetDirectory = "target"
 		}
 
-		if token != "" {
-			dbtResult := dbt.CollectDbtArtifacts(targetDirectory)
-			dbtResult.EnvVars = collectEnvVars()
-			dbtResult.UploaderVersion = build.Version
-			dbtResult.UploaderBuildTime = build.Time
-			uploadArtifacts(cmd.Context(), dbtResult, token, targetDirectory)
+		dbtResult := dbt.CollectDbtArtifacts(targetDirectory)
+		dbtResult.EnvVars = collectEnvVars()
+		dbtResult.UploaderVersion = build.Version
+		dbtResult.UploaderBuildTime = build.Time
+
+		if len(DbtLogFile) > 0 {
+			stdOut, _ := os.ReadFile(DbtLogFile)
+			dbtResult.StdOut = stdOut
 		}
+
+		uploadArtifacts(cmd.Context(), dbtResult, token, targetDirectory)
 
 		os.Exit(0)
 	},
 }
 
 func init() {
-	//runCmd.AddCommand(uploadRunCmd)
+	uploadRunCmd.Flags().StringVar(&SynqApiTokenFlag, "synq-token", "", "SYNQ API token")
+	uploadRunCmd.Flags().StringVar(&DbtLogFile, "dbt-log-file", "", "File with log output of dbt command")
 }

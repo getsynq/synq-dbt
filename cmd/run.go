@@ -88,13 +88,13 @@ func uploadArtifacts(ctx context.Context, dbtResult *v1.DbtResult, token string,
 	}
 
 	var err error
-	useSynqApiV2, _ := strconv.ParseBool(os.Getenv("SYNQ_API_V2"))
-	if useSynqApiV2 {
+	useSYNQApiV2, _ := strconv.ParseBool(os.Getenv("SYNQ_API_V2"))
+	if useSYNQApiV2 {
 		logrus.Infof("synq-dbt processing `%s`, uploading to `%s`", targetDirectory, synqV2ApiEndpoint)
-		err = uploadArtifactsToSynqV2(ctx, dbtResult, token, synqV2ApiEndpoint)
+		err = uploadArtifactsToSYNQV2(ctx, dbtResult, token, synqV2ApiEndpoint)
 	} else {
 		logrus.Infof("synq-dbt processing `%s`, uploading to `%s`", targetDirectory, synqV1ApiEndpoint)
-		err = uploadArtifactsToSynq(ctx, dbtResult, token, synqV1ApiEndpoint)
+		err = uploadArtifactsToSYNQ(ctx, dbtResult, token, synqV1ApiEndpoint)
 	}
 
 	if err != nil {
@@ -115,7 +115,7 @@ func collectEnvVars() map[string]string {
 	return envs
 }
 
-func uploadArtifactsToSynq(ctx context.Context, dbtResult *v1.DbtResult, token, url string) error {
+func uploadArtifactsToSYNQ(ctx context.Context, dbtResult *v1.DbtResult, token, url string) error {
 	api, err := synq.NewApi(url)
 	if err != nil {
 		return err
@@ -133,7 +133,7 @@ func uploadArtifactsToSynq(ctx context.Context, dbtResult *v1.DbtResult, token, 
 	return nil
 }
 
-func uploadArtifactsToSynqV2(ctx context.Context, dbtResult *v1.DbtResult, token string, synqApiEndpoint string) error {
+func uploadArtifactsToSYNQV2(ctx context.Context, dbtResult *v1.DbtResult, token string, synqApiEndpoint string) error {
 	if dbtResult == nil || token == "" {
 		return nil
 	}
