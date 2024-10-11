@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	ingestdbtv1 "buf.build/gen/go/getsynq/api/protocolbuffers/go/synq/ingest/dbt/v1"
 	"context"
+	"github.com/getsynq/synq-dbt/git"
 	"os"
+	"strconv"
 	"strings"
 
 	v1 "github.com/getsynq/cloud/api/clients/v1"
@@ -27,11 +30,6 @@ var runCmd = &cobra.Command{
 			logrus.Warnf("synq-dbt failed: missing SYNQ_TOKEN variable")
 		}
 
-		url, ok := os.LookupEnv("SYNQ_UPLOAD_URL")
-		if !ok {
-			url = "dbtapi.synq.io:443"
-		}
-
 		targetDirectory, ok := os.LookupEnv("SYNQ_TARGET_DIR")
 		if !ok {
 			targetDirectory = "target"
@@ -54,8 +52,6 @@ var runCmd = &cobra.Command{
 		}
 
 		if token != "" {
-			logrus.Infof("synq-dbt processing `%s`, uploading to `%s`", targetDirectory, url)
-
 			dbtResult := dbt.CollectDbtArtifacts(targetDirectory)
 			dbtResult.StdOut = stdOut
 			dbtResult.StdErr = stdErr
@@ -65,11 +61,7 @@ var runCmd = &cobra.Command{
 			dbtResult.Args = args
 			dbtResult.ExitCode = wrapperspb.Int32(int32(exitCode))
 
-			if err := uploadArtifactsToSynq(cmd.Context(), dbtResult, token, url); err != nil {
-				logrus.Warnf("synq-dbt failed: %s", err.Error())
-			} else {
-				logrus.Info("synq-dbt processing successfully finished")
-			}
+			uploadArtifacts(cmd.Context(), dbtResult, token, targetDirectory)
 		}
 
 		os.Exit(exitCode)
@@ -85,6 +77,34 @@ var EnvsToCollect = map[string]struct{}{
 	"AIRFLOW_CTX_DAG_RUN_ID":     {},
 }
 
+func uploadArtifacts(ctx context.Context, dbtResult *v1.DbtResult, token string, targetDirectory string) {
+	synqV1ApiEndpoint, ok := os.LookupEnv("SYNQ_UPLOAD_URL")
+	if !ok {
+		synqV1ApiEndpoint = "dbtapi.synq.io:443"
+	}
+	synqV2ApiEndpoint := "https://developer.synq.io/"
+	if envEndpoint, ok := os.LookupEnv("SYNQ_API_ENDPOINT"); ok {
+		synqV2ApiEndpoint = envEndpoint
+	}
+
+	var err error
+	useSYNQApiV2, _ := strconv.ParseBool(os.Getenv("SYNQ_API_V2"))
+	useSYNQApiV2 = useSYNQApiV2 || strings.HasPrefix(token, "st-")
+	if useSYNQApiV2 {
+		logrus.Infof("synq-dbt processing `%s`, uploading to `%s` using v2 API", targetDirectory, synqV2ApiEndpoint)
+		err = uploadArtifactsToSYNQV2(ctx, dbtResult, token, synqV2ApiEndpoint)
+	} else {
+		logrus.Infof("synq-dbt processing `%s`, uploading to `%s`", targetDirectory, synqV1ApiEndpoint)
+		err = uploadArtifactsToSYNQ(ctx, dbtResult, token, synqV1ApiEndpoint)
+	}
+
+	if err != nil {
+		logrus.Warnf("synq-dbt failed: %s", err.Error())
+	} else {
+		logrus.Info("synq-dbt processing successfully finished")
+	}
+}
+
 func collectEnvVars() map[string]string {
 	envs := map[string]string{}
 	for envName := range EnvsToCollect {
@@ -96,7 +116,7 @@ func collectEnvVars() map[string]string {
 	return envs
 }
 
-func uploadArtifactsToSynq(ctx context.Context, dbtResult *v1.DbtResult, token, url string) error {
+func uploadArtifactsToSYNQ(ctx context.Context, dbtResult *v1.DbtResult, token, url string) error {
 	api, err := synq.NewApi(url)
 	if err != nil {
 		return err
@@ -112,4 +132,54 @@ func uploadArtifactsToSynq(ctx context.Context, dbtResult *v1.DbtResult, token, 
 	logrus.Infof("synq-dbt successful")
 
 	return nil
+}
+
+func uploadArtifactsToSYNQV2(ctx context.Context, dbtResult *v1.DbtResult, token string, synqApiEndpoint string) error {
+	if dbtResult == nil || token == "" {
+		return nil
+	}
+
+	var artifacts []*ingestdbtv1.DbtArtifact
+	if dbtResult.Manifest != nil && len(dbtResult.Manifest.Value) > 0 {
+		artifacts = append(artifacts, &ingestdbtv1.DbtArtifact{
+			Artifact: &ingestdbtv1.DbtArtifact_ManifestJson{
+				ManifestJson: []byte(dbtResult.Manifest.GetValue()),
+			},
+		})
+	}
+	if dbtResult.RunResults != nil && len(dbtResult.RunResults.Value) > 0 {
+		artifacts = append(artifacts, &ingestdbtv1.DbtArtifact{
+			Artifact: &ingestdbtv1.DbtArtifact_RunResultsJson{
+				RunResultsJson: []byte(dbtResult.RunResults.GetValue()),
+			},
+		})
+	}
+	if dbtResult.Sources != nil && len(dbtResult.Sources.Value) > 0 {
+		artifacts = append(artifacts, &ingestdbtv1.DbtArtifact{
+			Artifact: &ingestdbtv1.DbtArtifact_SourcesJson{
+				SourcesJson: []byte(dbtResult.Sources.GetValue()),
+			},
+		})
+	}
+	if dbtResult.Catalog != nil && len(dbtResult.Catalog.Value) > 0 {
+		artifacts = append(artifacts, &ingestdbtv1.DbtArtifact{
+			Artifact: &ingestdbtv1.DbtArtifact_CatalogJson{
+				CatalogJson: []byte(dbtResult.Catalog.GetValue()),
+			},
+		})
+	}
+
+	dbtInvocation := &ingestdbtv1.IngestInvocationRequest{
+		Args:              dbtResult.GetArgs(),
+		ExitCode:          dbtResult.GetExitCode().GetValue(),
+		StdOut:            dbtResult.GetStdOut(),
+		StdErr:            dbtResult.GetStdErr(),
+		EnvironmentVars:   dbtResult.GetEnvVars(),
+		Artifacts:         artifacts,
+		UploaderVersion:   dbtResult.GetUploaderVersion(),
+		UploaderBuildTime: dbtResult.GetUploaderBuildTime(),
+		GitContext:        git.CollectGitContext(ctx, "."),
+	}
+
+	return synq.UploadMetadata(ctx, dbtInvocation, synqApiEndpoint, token)
 }

@@ -2,9 +2,13 @@ package cmd
 
 import (
 	"context"
+	"os"
 )
 
 func Execute(ctx context.Context) {
-	runCmd.SetContext(ctx)
-	_ = runCmd.Execute()
+	if len(os.Args) > 1 && os.Args[1] == "synq_upload_artifacts" {
+		_ = uploadRunCmd.ExecuteContext(ctx)
+	} else {
+		_ = runCmd.ExecuteContext(ctx)
+	}
 }
