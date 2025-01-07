@@ -31,7 +31,7 @@ It is possible to upload artifacts that have already been generated. In that cas
 
 ```shell
 
-export SYNQ_VERSION=v1.7.0rc0
+export SYNQ_VERSION=v1.7.0
 wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-amd64-linux
 chmod +x ./synq-dbt
 
