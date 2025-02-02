@@ -88,8 +88,14 @@ func ExecuteCommand(ctx context.Context, cmdName string, args ...string) (exitCo
 	if err != nil {
 		if errors.As(err, &exitError) {
 			return exitError.ExitCode(), outb.Bytes(), errb.Bytes(), err
+			}
 		}
+
+		return 0, outb.Bytes(), errb.Bytes(), nil
 	}
 
-	return 0, outb.Bytes(), errb.Bytes(), nil
+func terminateProcessGroup(ctx context.Context, cmd *exec.Cmd) {
+	<-ctx.Done()
+	logrus.Println("terminating process group", cmd.Process.Pid)
+	syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
 }
