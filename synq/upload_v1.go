@@ -8,41 +8,36 @@ import (
 
 	dbtv1 "github.com/getsynq/cloud/api/clients/dbt/v1"
 	v1 "github.com/getsynq/cloud/api/clients/v1"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
-type Api struct {
-	client dbtv1.DbtServiceClient
-}
+func uploadArtifactsToSYNQ(ctx context.Context, dbtResult *v1.DbtResult, token, url string) error {
 
-func NewApi(url string) (*Api, error) {
-	client, err := createDbtServiceClient(url)
+	client, err := createLegacyDbtServiceClient(url)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &Api{
-		client: client,
-	}, nil
-}
-
-func (api *Api) SendRequest(ctx context.Context, dbtArtifacts *v1.DbtResult) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
-	_, err := api.client.PostDbtResult(timeoutCtx, &dbtv1.PostDbtResultRequest{
-		DbtResult: dbtArtifacts,
-	})
+	dbtResult.Token = token
 
-	return err
+	_, err = client.PostDbtResult(timeoutCtx, &dbtv1.PostDbtResultRequest{
+		DbtResult: dbtResult,
+	})
+	if err != nil {
+		return err
+	}
+
+	logrus.Infof("synq-dbt upload successful (legacy)")
+
+	return nil
 }
 
-//
-// HELPERS
-//
-
-func createDbtServiceClient(url string) (dbtv1.DbtServiceClient, error) {
+func createLegacyDbtServiceClient(url string) (dbtv1.DbtServiceClient, error) {
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
 		return nil, err
