@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"time"
 
 	dbtv1 "github.com/getsynq/cloud/api/clients/dbt/v1"
 	v1 "github.com/getsynq/cloud/api/clients/v1"
@@ -15,17 +14,14 @@ import (
 
 func uploadArtifactsToSYNQ(ctx context.Context, dbtResult *v1.DbtResult, token, url string) error {
 
-	client, err := createLegacyDbtServiceClient(url)
+	client, err := createLegacyDbtServiceClient(ctx, url)
 	if err != nil {
 		return err
 	}
 
-	timeoutCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
-	defer cancel()
-
 	dbtResult.Token = token
 
-	_, err = client.PostDbtResult(timeoutCtx, &dbtv1.PostDbtResultRequest{
+	_, err = client.PostDbtResult(ctx, &dbtv1.PostDbtResultRequest{
 		DbtResult: dbtResult,
 	})
 	if err != nil {
@@ -37,7 +33,7 @@ func uploadArtifactsToSYNQ(ctx context.Context, dbtResult *v1.DbtResult, token, 
 	return nil
 }
 
-func createLegacyDbtServiceClient(url string) (dbtv1.DbtServiceClient, error) {
+func createLegacyDbtServiceClient(ctx context.Context, url string) (dbtv1.DbtServiceClient, error) {
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
 		return nil, err
@@ -51,7 +47,7 @@ func createLegacyDbtServiceClient(url string) (dbtv1.DbtServiceClient, error) {
 		grpc.WithTransportCredentials(creds),
 	}
 
-	conn, err := grpc.Dial(url, opts...)
+	conn, err := grpc.DialContext(ctx, url, opts...)
 	if err != nil {
 		return nil, err
 	}

@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/url"
-	"time"
 
 	ingestdbtv1grpc "buf.build/gen/go/getsynq/api/grpc/go/synq/ingest/dbt/v1/dbtv1grpc"
 	ingestdbtv1 "buf.build/gen/go/getsynq/api/protocolbuffers/go/synq/ingest/dbt/v1"
@@ -39,7 +38,7 @@ func ingestInvocation(ctx context.Context, output *ingestdbtv1.IngestInvocationR
 		return err
 	}
 
-	oauthTokenSource, err := LongLivedTokenSource(token, parsedEndpoint)
+	oauthTokenSource, err := LongLivedTokenSource(ctx, token, parsedEndpoint)
 	if err != nil {
 		return err
 	}
@@ -58,10 +57,7 @@ func ingestInvocation(ctx context.Context, output *ingestdbtv1.IngestInvocationR
 
 	dbtServiceClient := ingestdbtv1grpc.NewDbtServiceClient(conn)
 
-	timeoutCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
-	defer cancel()
-
-	resp, err := dbtServiceClient.IngestInvocation(timeoutCtx, output)
+	resp, err := dbtServiceClient.IngestInvocation(ctx, output)
 	if err != nil {
 		return err
 	}
