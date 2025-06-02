@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/getsynq/synq-dbt/build"
 	"github.com/getsynq/synq-dbt/dbt"
+	"github.com/getsynq/synq-dbt/synq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var SynqApiTokenFlag string
@@ -21,7 +23,7 @@ var uploadRunCmd = &cobra.Command{
 			token = SynqApiTokenFlag
 		}
 		if token == "" {
-			logrus.Warnf("synq-dbt failed: missing SYNQ_TOKEN variable")
+			logrus.Errorf("synq-dbt failed: missing SYNQ_TOKEN variable")
 			return
 		}
 
@@ -40,7 +42,7 @@ var uploadRunCmd = &cobra.Command{
 			dbtResult.StdOut = stdOut
 		}
 
-		uploadArtifacts(cmd.Context(), dbtResult, token, targetDirectory)
+		synq.UploadArtifacts(cmd.Context(), dbtResult, token, targetDirectory)
 
 		os.Exit(0)
 	},

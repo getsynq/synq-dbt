@@ -2,10 +2,11 @@ package synq
 
 import (
 	"context"
+	"net/url"
+
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/oauth"
-	"net/url"
 )
 
 type TokenSource interface {
@@ -13,8 +14,8 @@ type TokenSource interface {
 	credentials.PerRPCCredentials
 }
 
-func LongLivedTokenSource(longLivedToken string, apiEndpoint *url.URL) (TokenSource, error) {
-	initialToken, err := obtainToken(apiEndpoint, longLivedToken)
+func LongLivedTokenSource(ctx context.Context, longLivedToken string, apiEndpoint *url.URL) (TokenSource, error) {
+	initialToken, err := obtainToken(ctx, apiEndpoint, longLivedToken)
 	if err != nil {
 		return nil, err
 	}
@@ -28,10 +29,10 @@ type tokenSource struct {
 }
 
 func (t *tokenSource) Token() (*oauth2.Token, error) {
-	return obtainToken(t.apiEndpoint, t.longLivedToken)
+	return obtainToken(nil, t.apiEndpoint, t.longLivedToken)
 }
 
-func obtainToken(apiEndpoint *url.URL, longLivedToken string) (*oauth2.Token, error) {
+func obtainToken(ctx context.Context, apiEndpoint *url.URL, longLivedToken string) (*oauth2.Token, error) {
 
 	tokenURL, _ := url.Parse(apiEndpoint.String())
 	tokenURL.Path = "/oauth2/token"
@@ -41,5 +42,5 @@ func obtainToken(apiEndpoint *url.URL, longLivedToken string) (*oauth2.Token, er
 			AuthStyle: oauth2.AuthStyleInParams,
 		},
 	}
-	return conf.PasswordCredentialsToken(context.Background(), "synq", longLivedToken)
+	return conf.PasswordCredentialsToken(ctx, "synq", longLivedToken)
 }
