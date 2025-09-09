@@ -51,6 +51,29 @@ dbt build | tee dbt.log
 
 To successfully install and launch `synq-dbt` you will need `SYNQ_TOKEN` secret, that you generate in your SYNQ account when integrating with dbt Core. Reach out to the team if you have any questions. It should be treated as a secret as it allows SYNQ to identify you as the customer and associate uploaded data with your workspace.
 
+## Token Format
+
+**Important:** If your `SYNQ_TOKEN` doesn't start with `st-`, you're using a legacy token that will be deprecated. Legacy tokens (in any format different than `st-XXXXXXX`) must be updated to the new format for continued compatibility.
+
+To upgrade your token:
+1. Ensure you're using `synq-dbt` version 1.8.0 or later
+2. Generate a new v2 token in your SYNQ settings
+3. Replace your existing `SYNQ_TOKEN` environment variable with the new token starting with `st-`
+
+The new v2 tokens provide improved security and performance. Legacy tokens will continue working during the transition period, but we recommend proactively migrating to maintain compatibility with future SYNQ integrations.
+
+## Regional API Endpoints
+
+By default, `synq-dbt` connects to the European region API endpoint. If your SYNQ workspace is in the **US region**, you must:
+
+1. Use `synq-dbt` version 1.8.0 or newer
+2. Use only new v2 tokens (tokens starting with `st-`) - legacy tokens are not supported for US region
+3. Set the `SYNQ_API_ENDPOINT` environment variable:
+
+```bash
+export SYNQ_API_ENDPOINT=https://api.us.synq.io
+```
+
 ## Airflow
 
 We will cover two most common setups of dbt and Airflow:
