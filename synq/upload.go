@@ -13,9 +13,9 @@ import (
 )
 
 func UploadArtifacts(ctx context.Context, dbtResult *v1.DbtResult, token string, targetDirectory string) {
-	synqV1ApiEndpoint, ok := os.LookupEnv("SYNQ_UPLOAD_URL")
-	if !ok {
-		synqV1ApiEndpoint = "dbtapi.synq.io:443"
+	synqV1ApiEndpoint := "dbtapi.synq.io:443"
+	if envEndpoint, ok := os.LookupEnv("SYNQ_UPLOAD_URL"); ok {
+		synqV1ApiEndpoint = envEndpoint
 	}
 	synqV2ApiEndpoint := "https://developer.synq.io/"
 	if envEndpoint, ok := os.LookupEnv("SYNQ_API_ENDPOINT"); ok {
