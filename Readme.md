@@ -106,13 +106,15 @@ KubernetesPodOperator(
     ...
     env_vars={
         "SYNQ_TOKEN": Variable.get("SYNQ_TOKEN"),
-        # Optional: Pass Airflow context variables for better tracking in SYNQ
-        "AIRFLOW_CTX_DAG_OWNER": "{{ dag.owner }}",
+        # Required: Minimum set of Airflow context variables for tracking in SYNQ
         "AIRFLOW_CTX_DAG_ID": "{{ dag.dag_id }}",
         "AIRFLOW_CTX_TASK_ID": "{{ task.task_id }}",
-        "AIRFLOW_CTX_EXECUTION_DATE": "{{ execution_date }}",
-        "AIRFLOW_CTX_TRY_NUMBER": "{{ task_instance.try_number }}",
         "AIRFLOW_CTX_DAG_RUN_ID": "{{ dag_run.run_id }}",
+        # Highly recommended: Enables retry attempt tracking
+        "AIRFLOW_CTX_TRY_NUMBER": "{{ task_instance.try_number }}",
+        # Optional: Additional metadata
+        "AIRFLOW_CTX_DAG_OWNER": "{{ dag.owner }}",
+        "AIRFLOW_CTX_EXECUTION_DATE": "{{ execution_date }}",
     },
     cmds=["synq-dbt"],
     arguments=["test"],
@@ -126,18 +128,27 @@ DockerOperator(
     ...
     environment={
         "SYNQ_TOKEN": Variable.get("SYNQ_TOKEN"),
-        # Optional: Pass Airflow context variables for better tracking in SYNQ
-        "AIRFLOW_CTX_DAG_OWNER": "{{ dag.owner }}",
+        # Required: Minimum set of Airflow context variables for tracking in SYNQ
         "AIRFLOW_CTX_DAG_ID": "{{ dag.dag_id }}",
         "AIRFLOW_CTX_TASK_ID": "{{ task.task_id }}",
-        "AIRFLOW_CTX_EXECUTION_DATE": "{{ execution_date }}",
-        "AIRFLOW_CTX_TRY_NUMBER": "{{ task_instance.try_number }}",
         "AIRFLOW_CTX_DAG_RUN_ID": "{{ dag_run.run_id }}",
+        # Highly recommended: Enables retry attempt tracking
+        "AIRFLOW_CTX_TRY_NUMBER": "{{ task_instance.try_number }}",
+        # Optional: Additional metadata
+        "AIRFLOW_CTX_DAG_OWNER": "{{ dag.owner }}",
+        "AIRFLOW_CTX_EXECUTION_DATE": "{{ execution_date }}",
     },
 )
 ```
 
-These Airflow context variables are automatically collected by `synq-dbt` when present and help identify which DAG and task execution the artifacts belong to in SYNQ.
+**Required Airflow Context Variables:**
+- `AIRFLOW_CTX_DAG_ID`, `AIRFLOW_CTX_TASK_ID`, `AIRFLOW_CTX_DAG_RUN_ID` - These three variables are required together for SYNQ to link dbt artifacts to Airflow DAG runs. Without all three, Airflow context will not be recognized.
+
+**Highly Recommended:**
+- `AIRFLOW_CTX_TRY_NUMBER` - Enables tracking of retry attempts. Defaults to 1 if not provided.
+
+**Optional:**
+- `AIRFLOW_CTX_DAG_OWNER`, `AIRFLOW_CTX_EXECUTION_DATE` - Additional metadata that can be useful for debugging and auditing.
 
 You're all set! :tada:
 
