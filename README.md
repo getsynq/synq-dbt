@@ -110,7 +110,6 @@ KubernetesPodOperator(
         "AIRFLOW_CTX_DAG_ID": "{{ dag.dag_id }}",
         "AIRFLOW_CTX_TASK_ID": "{{ task.task_id }}",
         "AIRFLOW_CTX_DAG_RUN_ID": "{{ dag_run.run_id }}",
-        # Highly recommended: Enables retry attempt tracking
         "AIRFLOW_CTX_TRY_NUMBER": "{{ task_instance.try_number }}",
         # Optional: Additional metadata
         "AIRFLOW_CTX_DAG_OWNER": "{{ dag.owner }}",
@@ -132,7 +131,6 @@ DockerOperator(
         "AIRFLOW_CTX_DAG_ID": "{{ dag.dag_id }}",
         "AIRFLOW_CTX_TASK_ID": "{{ task.task_id }}",
         "AIRFLOW_CTX_DAG_RUN_ID": "{{ dag_run.run_id }}",
-        # Highly recommended: Enables retry attempt tracking
         "AIRFLOW_CTX_TRY_NUMBER": "{{ task_instance.try_number }}",
         # Optional: Additional metadata
         "AIRFLOW_CTX_DAG_OWNER": "{{ dag.owner }}",
