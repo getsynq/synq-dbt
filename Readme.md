@@ -105,12 +105,39 @@ In the case of `KubernetesPodOperator` change, the result should for example loo
 KubernetesPodOperator(
     ...
     env_vars={
-        "SYNQ_TOKEN": Variable.get("SYNQ_TOKEN")
+        "SYNQ_TOKEN": Variable.get("SYNQ_TOKEN"),
+        # Optional: Pass Airflow context variables for better tracking in SYNQ
+        "AIRFLOW_CTX_DAG_OWNER": "{{ dag.owner }}",
+        "AIRFLOW_CTX_DAG_ID": "{{ dag.dag_id }}",
+        "AIRFLOW_CTX_TASK_ID": "{{ task.task_id }}",
+        "AIRFLOW_CTX_EXECUTION_DATE": "{{ execution_date }}",
+        "AIRFLOW_CTX_TRY_NUMBER": "{{ task_instance.try_number }}",
+        "AIRFLOW_CTX_DAG_RUN_ID": "{{ dag_run.run_id }}",
     },
     cmds=["synq-dbt"],
     arguments=["test"],
 )
 ```
+
+**Note:** When using `DockerOperator`, use the `environment` parameter instead:
+
+```python
+DockerOperator(
+    ...
+    environment={
+        "SYNQ_TOKEN": Variable.get("SYNQ_TOKEN"),
+        # Optional: Pass Airflow context variables for better tracking in SYNQ
+        "AIRFLOW_CTX_DAG_OWNER": "{{ dag.owner }}",
+        "AIRFLOW_CTX_DAG_ID": "{{ dag.dag_id }}",
+        "AIRFLOW_CTX_TASK_ID": "{{ task.task_id }}",
+        "AIRFLOW_CTX_EXECUTION_DATE": "{{ execution_date }}",
+        "AIRFLOW_CTX_TRY_NUMBER": "{{ task_instance.try_number }}",
+        "AIRFLOW_CTX_DAG_RUN_ID": "{{ dag_run.run_id }}",
+    },
+)
+```
+
+These Airflow context variables are automatically collected by `synq-dbt` when present and help identify which DAG and task execution the artifacts belong to in SYNQ.
 
 You're all set! :tada:
 
