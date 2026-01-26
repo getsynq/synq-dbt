@@ -4,53 +4,51 @@ import (
 	"os"
 	"path/filepath"
 
-	v1 "github.com/getsynq/cloud/api/clients/v1"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 var (
 	json = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
-func CollectDbtArtifacts(targetPath string) *v1.DbtResult {
-	dbtResult := &v1.DbtResult{}
+func CollectDbtArtifacts(targetPath string) *Artifacts {
+	artifacts := &Artifacts{}
 
 	manifest, invocationId, err := readArtifact(targetPath, "manifest.json")
 	if err == nil {
-		dbtResult.InvocationId = invocationId
-		dbtResult.Manifest = wrapperspb.String(manifest)
+		artifacts.InvocationId = invocationId
+		artifacts.Manifest = manifest
 	}
 
 	runResults, invocationId, err := readArtifact(targetPath, "run_results.json")
 	if err == nil {
-		if dbtResult.InvocationId == "" {
-			dbtResult.InvocationId = invocationId
+		if artifacts.InvocationId == "" {
+			artifacts.InvocationId = invocationId
 		}
 
-		dbtResult.RunResults = wrapperspb.String(runResults)
+		artifacts.RunResults = runResults
 	}
 
 	catalog, invocationId, err := readArtifact(targetPath, "catalog.json")
 	if err == nil {
-		if dbtResult.InvocationId == "" {
-			dbtResult.InvocationId = invocationId
+		if artifacts.InvocationId == "" {
+			artifacts.InvocationId = invocationId
 		}
 
-		dbtResult.Catalog = wrapperspb.String(catalog)
+		artifacts.Catalog = catalog
 	}
 
 	sources, invocationId, err := readArtifact(targetPath, "sources.json")
 	if err == nil {
-		if dbtResult.InvocationId == "" {
-			dbtResult.InvocationId = invocationId
+		if artifacts.InvocationId == "" {
+			artifacts.InvocationId = invocationId
 		}
 
-		dbtResult.Sources = wrapperspb.String(sources)
+		artifacts.Sources = sources
 	}
 
-	return dbtResult
+	return artifacts
 }
 
 func readArtifact(directory, name string) (string, string, error) {
