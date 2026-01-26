@@ -53,22 +53,16 @@ To successfully install and launch `synq-dbt` you will need `SYNQ_TOKEN` secret,
 
 ## Token Format
 
-**Important:** If your `SYNQ_TOKEN` doesn't start with `st-`, you're using a legacy token that will be deprecated. Legacy tokens (in any format different than `st-XXXXXXX`) must be updated to the new format for continued compatibility.
+**Important:** Your `SYNQ_TOKEN` must start with `st-`. If you have an older token in a different format, you must upgrade to the new token format.
 
-To upgrade your token:
-1. Ensure you're using `synq-dbt` version 1.8.0 or later
-2. Generate a new v2 token in your SYNQ settings
-3. Replace your existing `SYNQ_TOKEN` environment variable with the new token starting with `st-`
-
-The new v2 tokens provide improved security and performance. Legacy tokens will continue working during the transition period, but we recommend proactively migrating to maintain compatibility with future SYNQ integrations.
+To get your token:
+1. Ensure you're using `synq-dbt` version 2.0.0 or later
+2. Generate a new token in your SYNQ settings
+3. Set your `SYNQ_TOKEN` environment variable with the token starting with `st-`
 
 ## Regional API Endpoints
 
-By default, `synq-dbt` connects to the European region API endpoint. If your SYNQ workspace is in the **US region**, you must:
-
-1. Use `synq-dbt` version 1.8.0 or newer
-2. Use only new v2 tokens (tokens starting with `st-`) - legacy tokens are not supported for US region
-3. Set the `SYNQ_API_ENDPOINT` environment variable:
+By default, `synq-dbt` connects to the European region API endpoint (`developer.synq.io`). If your SYNQ workspace is in the **US region**, you must set the `SYNQ_API_ENDPOINT` environment variable:
 
 ```bash
 export SYNQ_API_ENDPOINT=https://api.us.synq.io
@@ -298,7 +292,7 @@ def jaffle_shop_dbt_assets(context: AssetExecutionContext, dbt: DbtCliResource):
 
 **A:** Every time it executes `synq-dbt,` one gRPC request is made to SYNQ servers. The payload of the request contains dbt artifacts and an authentication token that the server uses to verify your data.
 
-**Note: Depending on your setup, you might have to allow egress traffic in your network firewall to `dbtapi.synq.io:443`.**
+**Note: Depending on your setup, you might have to allow egress traffic in your network firewall to `developer.synq.io:443` (EU region) or `api.us.synq.io:443` (US region).**
 
 ##
 

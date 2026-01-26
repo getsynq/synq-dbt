@@ -32,17 +32,20 @@ var uploadRunCmd = &cobra.Command{
 			targetDirectory = "target"
 		}
 
-		dbtResult := dbt.CollectDbtArtifacts(targetDirectory)
-		dbtResult.EnvVars = collectEnvVars()
-		dbtResult.UploaderVersion = build.Version
-		dbtResult.UploaderBuildTime = build.Time
+		artifacts := dbt.CollectDbtArtifacts(targetDirectory)
+
+		builder := synq.NewRequestBuilder().
+			WithArtifacts(artifacts).
+			WithEnvVars(collectEnvVars()).
+			WithUploaderInfo(build.Version, build.Time).
+			WithGitContext(cmd.Context(), ".")
 
 		if len(DbtLogFile) > 0 {
 			stdOut, _ := os.ReadFile(DbtLogFile)
-			dbtResult.StdOut = stdOut
+			builder.WithStdOut(stdOut)
 		}
 
-		synq.UploadArtifacts(cmd.Context(), dbtResult, token, targetDirectory)
+		synq.UploadArtifacts(cmd.Context(), builder.Build(), token, targetDirectory)
 
 		os.Exit(0)
 	},

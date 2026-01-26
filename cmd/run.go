@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"github.com/getsynq/synq-dbt/build"
-	"google.golang.org/protobuf/types/known/wrapperspb"
-
 	"github.com/getsynq/synq-dbt/command"
 	"github.com/getsynq/synq-dbt/dbt"
 	"github.com/getsynq/synq-dbt/synq"
@@ -47,16 +45,20 @@ var runCmd = &cobra.Command{
 		}
 
 		if token != "" {
-			dbtResult := dbt.CollectDbtArtifacts(targetDirectory)
-			dbtResult.StdOut = stdOut
-			dbtResult.StdErr = stdErr
-			dbtResult.EnvVars = collectEnvVars()
-			dbtResult.UploaderVersion = build.Version
-			dbtResult.UploaderBuildTime = build.Time
-			dbtResult.Args = args
-			dbtResult.ExitCode = wrapperspb.Int32(int32(exitCode))
+			artifacts := dbt.CollectDbtArtifacts(targetDirectory)
 
-			synq.UploadArtifacts(cmd.Context(), dbtResult, token, targetDirectory)
+			request := synq.NewRequestBuilder().
+				WithArtifacts(artifacts).
+				WithStdOut(stdOut).
+				WithStdErr(stdErr).
+				WithEnvVars(collectEnvVars()).
+				WithUploaderInfo(build.Version, build.Time).
+				WithArgs(args).
+				WithExitCode(exitCode).
+				WithGitContext(cmd.Context(), ".").
+				Build()
+
+			synq.UploadArtifacts(cmd.Context(), request, token, targetDirectory)
 		}
 
 		os.Exit(exitCode)

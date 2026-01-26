@@ -4,46 +4,29 @@ import (
 	"context"
 	"errors"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 
-	v1 "github.com/getsynq/cloud/api/clients/v1"
+	ingestdbtv1 "buf.build/gen/go/getsynq/api/protocolbuffers/go/synq/ingest/dbt/v1"
 	"github.com/sirupsen/logrus"
 )
 
-func UploadArtifacts(ctx context.Context, dbtResult *v1.DbtResult, token string, targetDirectory string) {
-	synqV1ApiEndpoint := "dbtapi.synq.io:443"
-	if envEndpoint, ok := os.LookupEnv("SYNQ_UPLOAD_URL"); ok {
-		synqV1ApiEndpoint = envEndpoint
-	}
-	synqV2ApiEndpoint := "https://developer.synq.io/"
+func UploadArtifacts(ctx context.Context, request *ingestdbtv1.IngestInvocationRequest, token string, targetDirectory string) {
+	synqApiEndpoint := "https://developer.synq.io/"
 	if envEndpoint, ok := os.LookupEnv("SYNQ_API_ENDPOINT"); ok {
-		synqV2ApiEndpoint = envEndpoint
+		synqApiEndpoint = envEndpoint
 	}
 
 	uploadTimeout := time.Second * 30
 	maxRetries := 3
 	retryDelays := []time.Duration{5 * time.Second, 10 * time.Second, 15 * time.Second}
 
-	useSYNQApiV2, _ := strconv.ParseBool(os.Getenv("SYNQ_API_V2"))
-	useSYNQApiV2 = useSYNQApiV2 || strings.HasPrefix(token, "st-")
-
-	if useSYNQApiV2 {
-		logrus.Infof("synq-dbt processing `%s`, uploading to `%s` using v2 API", targetDirectory, synqV2ApiEndpoint)
-	} else {
-		logrus.Infof("synq-dbt processing `%s`, uploading to `%s` using legacy API", targetDirectory, synqV1ApiEndpoint)
-	}
+	logrus.Infof("synq-dbt processing `%s`, uploading to `%s`", targetDirectory, synqApiEndpoint)
 
 	var err error
 	for attempt := 0; attempt <= maxRetries; attempt++ {
 		timeoutCtx, cancel := context.WithTimeout(ctx, uploadTimeout)
 
-		if useSYNQApiV2 {
-			err = uploadArtifactsToSYNQV2(timeoutCtx, dbtResult, token, synqV2ApiEndpoint)
-		} else {
-			err = uploadArtifactsToSYNQ(timeoutCtx, dbtResult, token, synqV1ApiEndpoint)
-		}
+		err = uploadArtifactsToSYNQ(timeoutCtx, request, token, synqApiEndpoint)
 
 		cancel()
 
