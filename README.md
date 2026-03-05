@@ -31,7 +31,7 @@ It is possible to upload artifacts that have already been generated. In that cas
 
 ```shell
 
-export SYNQ_VERSION=v1.8.0
+export SYNQ_VERSION=v2.0.0
 wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-amd64-linux
 chmod +x ./synq-dbt
 
@@ -53,12 +53,7 @@ To successfully install and launch `synq-dbt` you will need `SYNQ_TOKEN` secret,
 
 ## Token Format
 
-**Important:** Your `SYNQ_TOKEN` must start with `st-`. If you have an older token in a different format, you must upgrade to the new token format.
-
-To get your token:
-1. Ensure you're using `synq-dbt` version 2.0.0 or later
-2. Generate a new token in your SYNQ settings
-3. Set your `SYNQ_TOKEN` environment variable with the token starting with `st-`
+Your `SYNQ_TOKEN` must start with `st-`. You can generate a token in your SYNQ settings under Settings -> Integrations -> dbt Core.
 
 ## Regional API Endpoints
 
@@ -86,7 +81,7 @@ In case none of these works for you, don't hesitate to get in touch with us.
 Add the following lines to your runner's Dockerfile to install `synq-dbt`:
 
 ```dockerfile
-ENV SYNQ_VERSION=v1.8.0
+ENV SYNQ_VERSION=v2.0.0
 RUN wget -O /usr/bin/synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-amd64-linux
 RUN chmod +x /usr/bin/synq-dbt
 ```
@@ -151,7 +146,7 @@ You're all set! :tada:
 2) Execute the following shell commands to download the latest version of `synq-dbt`
 
 ```shell
-export SYNQ_VERSION=v1.8.0
+export SYNQ_VERSION=v2.0.0
 wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-amd64-linux
 chmod +x ./synq-dbt
 ```
@@ -188,7 +183,7 @@ You're all set! :tada:
 Add the following lines to your Dockerfile:
 
 ```dockerfile
-ENV SYNQ_VERSION=v1.8.0
+ENV SYNQ_VERSION=v2.0.0
 RUN wget -O /usr/bin/synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-amd64-linux
 RUN chmod +x /usr/bin/synq-dbt
 ```
@@ -200,7 +195,7 @@ The `synq-dbt` command is available for execution. :tada:
 1) Execute the following shell commands to download the latest version of `synq-dbt`
 
 ```shell
-export SYNQ_VERSION=v1.8.0
+export SYNQ_VERSION=v2.0.0
 wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-amd64-linux
 chmod +x ./synq-dbt
 ```
@@ -220,7 +215,7 @@ OSX version is primarily used for testing, by manually triggering `synq-ctl`.
 1) Execute the following shell commands to download the latest version of `synq-dbt`
 
 ```shell
-export SYNQ_VERSION=v1.8.0
+export SYNQ_VERSION=v2.0.0
 wget -O ./synq-dbt https://github.com/getsynq/synq-dbt/releases/download/${SYNQ_VERSION}/synq-dbt-arm64-darwin
 chmod +x ./synq-dbt
 ```
