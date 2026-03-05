@@ -1,6 +1,8 @@
 package dbt
 
 import (
+	stdjson "encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -56,6 +58,16 @@ func readArtifact(directory, name string) (string, string, error) {
 	if err != nil {
 		logrus.Infof("synq-dbt %s, skipping", err)
 		return "", "", err
+	}
+
+	if len(artifact) == 0 {
+		logrus.Warnf("synq-dbt %s is empty, skipping", name)
+		return "", "", fmt.Errorf("%s is empty", name)
+	}
+
+	if !stdjson.Valid(artifact) {
+		logrus.Warnf("synq-dbt %s contains invalid JSON (file may have been modified during read), skipping", name)
+		return "", "", fmt.Errorf("%s contains invalid JSON", name)
 	}
 
 	invocationId := json.Get(artifact, "metadata", "invocation_id").ToString()
