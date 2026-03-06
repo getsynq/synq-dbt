@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"syscall"
+	"time"
 )
 
 var (
@@ -18,10 +19,19 @@ var (
 
 func ExecuteCommand(ctx context.Context, cmdName string, args ...string) (exitCode int, stdOut []byte, stdErr []byte, err error) {
 	cmd := exec.CommandContext(ctx, cmdName, args...)
+	// Pgid: 0 creates a new process group for the child with PGID = child's PID.
+	// This ensures that cmd.Cancel's syscall.Kill(-cmd.Process.Pid, SIGKILL)
+	// correctly targets the child's entire process group (including grandchildren
+	// such as Snowflake connector subprocesses), not synq-dbt's own PGID.
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Setpgid: true,
-		Pgid:    syscall.Getpgrp(),
+		Pgid:    0,
 	}
+	// WaitDelay gives the process group a 30-second grace period after context
+	// cancellation before force-killing it. This guards against the rare case
+	// where the initial Kill in cmd.Cancel does not immediately terminate the
+	// process (e.g. uninterruptible disk wait).
+	cmd.WaitDelay = 30 * time.Second
 	cmd.Cancel = func() error {
 		logrus.Println("cancelling subcommand", cmd.Process.Pid)
 		var errors []error
