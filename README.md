@@ -13,7 +13,13 @@ synq-dbt is a command line tool that executes dbt and uploads dbt artifacts to [
 - `catalog.json` — to infer the complete schema of underlying data warehouse tables
 - `sources.json` — to capture dbt source freshness
 
-To control the location of artifacts, you can use the `SYNQ_TARGET_DIR` environment variable. By default, `synq-dbt` looks for `target/` directory in the current working directory.
+By default, `synq-dbt` looks for artifacts in the `target/` directory. It automatically detects custom target paths from multiple sources, checked in this order:
+
+1. `SYNQ_TARGET_DIR` environment variable (explicit override, highest priority)
+2. `--target-path` flag passed to dbt
+3. `DBT_TARGET_PATH` environment variable
+4. `target-path` setting in `dbt_project.yml`
+5. `target` (default)
 
 All the data is presented in the [SYNQ](https://www.synq.io).
 
@@ -263,7 +269,7 @@ resources={
         "dbt": DbtCliResource(dbt_executable='synq-dbt', project_dir=os.fspath(dbt_project_dir)),
 }
 ```
-3) By default, Dagster creates a dynamic path for the dbt artifacts but SYNQ always looks in the root target folder. In your `assets.py` file, update the `target_path` so that artifacts are stored in the root target folder
+3) By default, Dagster creates a dynamic path for the dbt artifacts. `synq-dbt` will automatically detect the target path if it's set via `--target-path` flag or `DBT_TARGET_PATH` environment variable. If Dagster uses a custom path that isn't passed through these standard dbt options, you can either set `SYNQ_TARGET_DIR` to point to it, or update the `target_path` so that artifacts are stored in the root target folder:
 
 ```python
 @dbt_assets(manifest=dbt_manifest_path)

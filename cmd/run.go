@@ -23,11 +23,6 @@ var runCmd = &cobra.Command{
 			logrus.Warnf("synq-dbt failed: missing SYNQ_TOKEN variable")
 		}
 
-		targetDirectory, ok := os.LookupEnv("SYNQ_TARGET_DIR")
-		if !ok {
-			targetDirectory = "target"
-		}
-
 		dbtBin, ok := os.LookupEnv("SYNQ_DBT_BIN")
 		dbtBin = strings.TrimSpace(dbtBin)
 		if !ok || dbtBin == "" {
@@ -45,6 +40,7 @@ var runCmd = &cobra.Command{
 		}
 
 		if token != "" {
+			targetDirectory := dbt.ResolveTargetDir(args)
 			artifacts := dbt.CollectDbtArtifacts(targetDirectory)
 
 			request := synq.NewRequestBuilder().

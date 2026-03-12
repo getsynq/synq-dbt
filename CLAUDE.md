@@ -38,8 +38,9 @@ The CLI has two modes of operation:
   - `run.go` - Main wrap mode: executes dbt, collects artifacts, uploads
   - `upload_synq.go` - Upload-only mode for pre-existing artifacts
   - `root.go` - Command router
-- **dbt/** - Artifact collection
+- **dbt/** - Artifact collection and target directory resolution
   - `artifacts.go` - Reads JSON files from target directory
+  - `target_path.go` - Resolves target directory from multiple sources
   - `result.go` - `Artifacts` struct holding raw JSON strings
 - **synq/** - SYNQ API integration
   - `upload.go` - Upload with retries and gRPC client
@@ -58,11 +59,22 @@ Uses gRPC to communicate with SYNQ via `buf.build/gen/go/getsynq/api`. The `Inge
 - Git context
 - Uploader version
 
+### Target Directory Resolution
+
+The target directory (where dbt writes artifacts) is resolved in priority order:
+1. `SYNQ_TARGET_DIR` env var (explicit SYNQ override)
+2. `--target-path` flag from dbt CLI args
+3. `DBT_TARGET_PATH` env var
+4. `target-path` in `dbt_project.yml`
+5. `"target"` default
+
+Logic lives in `dbt/target_path.go` (`ResolveTargetDir`).
+
 ### Environment Variables
 
 - `SYNQ_TOKEN` - Required. Must start with `st-`
 - `SYNQ_API_ENDPOINT` - Optional. Default: `https://developer.synq.io/`. US region: `https://api.us.synq.io`
-- `SYNQ_TARGET_DIR` - Optional. Default: `target`
+- `SYNQ_TARGET_DIR` - Optional. Overrides all other target directory detection. Default: auto-detected (see above)
 - `SYNQ_DBT_BIN` - Optional. Default: `dbt`
 
 ### Collected Airflow Context

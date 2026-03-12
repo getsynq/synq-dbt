@@ -27,11 +27,7 @@ var uploadRunCmd = &cobra.Command{
 			return
 		}
 
-		targetDirectory, ok := os.LookupEnv("SYNQ_TARGET_DIR")
-		if !ok {
-			targetDirectory = "target"
-		}
-
+		targetDirectory := dbt.ResolveTargetDir(nil)
 		artifacts := dbt.CollectDbtArtifacts(targetDirectory)
 
 		builder := synq.NewRequestBuilder().
