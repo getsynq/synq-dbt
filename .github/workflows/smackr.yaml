@@ -1,0 +1,19 @@
+name: Slack emoji PR updates
+
+on:
+  pull_request_review:
+    types: [submitted]
+  pull_request:
+    types: [closed]
+
+jobs:
+  slack-pr-react:
+    # Skip fork PRs to avoid leaking secrets
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: getsynq/slack-pr-react@v1
+        with:
+          slack-api-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel-id: ${{ vars.SLACK_CHANNEL_ID }}
+          slack-app-id: ${{ vars.SLACK_APP_ID }}
