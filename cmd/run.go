@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"os"
 	"strings"
 
@@ -11,6 +12,41 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
+
+// uploadArtifactsSafe runs the SYNQ-side upload pipeline with a panic guard
+// so that any failure on our side (artifact parsing, gRPC, OAuth, …) is
+// swallowed and never affects dbt's exit code propagation. The wrapper is
+// supposed to be transparent: dbt has already finished by the time we get
+// here, and the orchestrator must see dbt's real exit code.
+func uploadArtifactsSafe(
+	ctx context.Context,
+	token string,
+	args []string,
+	exitCode int,
+	stdOut, stdErr []byte,
+) {
+	defer func() {
+		if r := recover(); r != nil {
+			logrus.Errorf("synq-dbt: panic during upload (ignored): %v", r)
+		}
+	}()
+
+	targetDirectory := dbt.ResolveTargetDir(args)
+	artifacts := dbt.CollectDbtArtifacts(targetDirectory)
+
+	request := synq.NewRequestBuilder().
+		WithArtifacts(artifacts).
+		WithStdOut(stdOut).
+		WithStdErr(stdErr).
+		WithEnvVars(collectEnvVars()).
+		WithUploaderInfo(build.Version, build.Time).
+		WithArgs(args).
+		WithExitCode(exitCode).
+		WithGitContext(ctx, ".").
+		Build()
+
+	synq.UploadArtifacts(ctx, request, token, targetDirectory)
+}
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
@@ -40,21 +76,7 @@ var runCmd = &cobra.Command{
 		}
 
 		if token != "" {
-			targetDirectory := dbt.ResolveTargetDir(args)
-			artifacts := dbt.CollectDbtArtifacts(targetDirectory)
-
-			request := synq.NewRequestBuilder().
-				WithArtifacts(artifacts).
-				WithStdOut(stdOut).
-				WithStdErr(stdErr).
-				WithEnvVars(collectEnvVars()).
-				WithUploaderInfo(build.Version, build.Time).
-				WithArgs(args).
-				WithExitCode(exitCode).
-				WithGitContext(cmd.Context(), ".").
-				Build()
-
-			synq.UploadArtifacts(cmd.Context(), request, token, targetDirectory)
+			uploadArtifactsSafe(cmd.Context(), token, args, exitCode, stdOut, stdErr)
 		}
 
 		os.Exit(exitCode)
