@@ -27,8 +27,27 @@ import (
 //
 // Snowflake's ABORT QUERY and dbt-core's KeyboardInterrupt cleanup both
 // complete in a few seconds in practice, so 15s leaves plenty of head-room.
-// Exposed as a var so tests can shorten it.
+// Operators can override at startup via SYNQ_DBT_CANCEL_GRACE_PERIOD (any Go
+// duration string, e.g. "30s", "1m"). Tests override the variable directly.
 var CancelGracePeriod = 15 * time.Second
+
+const cancelGracePeriodEnv = "SYNQ_DBT_CANCEL_GRACE_PERIOD"
+
+func init() {
+	if v := os.Getenv(cancelGracePeriodEnv); v != "" {
+		if d, err := time.ParseDuration(v); err == nil && d > 0 {
+			CancelGracePeriod = d
+			logrus.Printf("%s=%s overrides default cancel grace period", cancelGracePeriodEnv, d)
+		} else {
+			logrus.Warnf(
+				"ignoring %s=%q (must be a positive Go duration like 30s or 1m): %v",
+				cancelGracePeriodEnv,
+				v,
+				err,
+			)
+		}
+	}
+}
 
 func ExecuteCommand(
 	ctx context.Context,

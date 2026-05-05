@@ -53,6 +53,18 @@ dbt build | tee dbt.log
 
 ```
 
+# Environment Variables
+
+| Variable | Required | Default | Purpose |
+| --- | --- | --- | --- |
+| `SYNQ_TOKEN` | Yes | — | SYNQ API token. Must start with `st-`. Generated in SYNQ Settings → Integrations → dbt Core. |
+| `SYNQ_API_ENDPOINT` | No | `https://developer.synq.io/` | API endpoint. US workspaces: `https://api.us.synq.io`. |
+| `SYNQ_DBT_BIN` | No | `dbt` | Name or path of the dbt binary `synq-dbt` invokes. |
+| `SYNQ_TARGET_DIR` | No | auto-detected | Force the target directory artifacts are read from. Overrides `--target-path`, `DBT_TARGET_PATH`, and the `target-path` setting in `dbt_project.yml`. |
+| `SYNQ_DBT_CANCEL_GRACE_PERIOD` | No | `15s` | How long dbt has to handle `SIGINT` and clean up (e.g. cancel in-flight Snowflake queries) before `synq-dbt` `SIGKILL`s the process group. Accepts any Go duration string (`10s`, `1m`, `500ms`). Should stay below your orchestrator's kill timeout — Airflow's `killed_task_cleanup_time` defaults to 60s, Kubernetes' `terminationGracePeriodSeconds` to 30s — so the wrapper finishes its own cleanup before the orchestrator gives up on it. |
+
+`AIRFLOW_CTX_*` variables (`DAG_ID`, `TASK_ID`, `DAG_RUN_ID`, `TRY_NUMBER`, `DAG_OWNER`, `EXECUTION_DATE`) are also picked up when present; see the [Airflow](#airflow) section.
+
 # Installation
 
 To successfully install and launch `synq-dbt` you will need `SYNQ_TOKEN` secret, that you generate in your SYNQ account when integrating with dbt Core. Reach out to the team if you have any questions. It should be treated as a secret as it allows SYNQ to identify you as the customer and associate uploaded data with your workspace.

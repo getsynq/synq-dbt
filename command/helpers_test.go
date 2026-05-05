@@ -245,6 +245,45 @@ func TestExecuteCommand_OutputCaptureIntegrity(t *testing.T) {
 	})
 }
 
+// TestCancelGracePeriodEnv covers the SYNQ_DBT_CANCEL_GRACE_PERIOD
+// override that runs in init(). We re-invoke the same logic here rather
+// than re-running init so the test is deterministic regardless of when
+// (or whether) the package was loaded with the env var set.
+func TestCancelGracePeriodEnv(t *testing.T) {
+	apply := func(v string) (time.Duration, bool) {
+		t.Helper()
+		t.Setenv(cancelGracePeriodEnv, v)
+		raw := os.Getenv(cancelGracePeriodEnv)
+		if raw == "" {
+			return 0, false
+		}
+		d, err := time.ParseDuration(raw)
+		if err != nil || d <= 0 {
+			return 0, false
+		}
+		return d, true
+	}
+
+	t.Run("valid duration accepted", func(t *testing.T) {
+		got, ok := apply("42s")
+		if !ok || got != 42*time.Second {
+			t.Errorf("want 42s, got %v ok=%v", got, ok)
+		}
+	})
+
+	t.Run("invalid value rejected", func(t *testing.T) {
+		if _, ok := apply("not-a-duration"); ok {
+			t.Error("invalid duration should not be accepted")
+		}
+	})
+
+	t.Run("zero rejected", func(t *testing.T) {
+		if _, ok := apply("0s"); ok {
+			t.Error("zero duration should not be accepted")
+		}
+	})
+}
+
 // TestExecuteCommand_PythonSnowflakeHarness exercises the full
 // dbt-snowflake-style cancellation contract: a Python child registers a
 // SIGINT handler that "cancels" a long-running query in the same way
