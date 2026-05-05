@@ -2,21 +2,22 @@ package main
 
 import (
 	"context"
-	"github.com/getsynq/synq-dbt/build"
-	"github.com/getsynq/synq-dbt/cmd"
-	"github.com/sirupsen/logrus"
-	easy "github.com/t-tomalak/logrus-easy-formatter"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	"github.com/getsynq/synq-dbt/build"
+	"github.com/getsynq/synq-dbt/cmd"
+	"github.com/sirupsen/logrus"
+	easy "github.com/t-tomalak/logrus-easy-formatter"
 )
 
 //go:generate bash bin/version.sh
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-	signals := []os.Signal{os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGKILL}
+	signals := []os.Signal{os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT}
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, signals...)
 	go func() {
@@ -34,7 +35,14 @@ func main() {
 		LogFormat:       "%time%  %msg%\n",
 	})
 
-	logrus.Printf("synq-dbt %s (%s) started (pid %d pgrp %d ppid %d)", strings.TrimSpace(build.Version), strings.TrimSpace(build.Time), os.Getpid(), syscall.Getpgrp(), syscall.Getppid())
+	logrus.Printf(
+		"synq-dbt %s (%s) started (pid %d pgrp %d ppid %d)",
+		strings.TrimSpace(build.Version),
+		strings.TrimSpace(build.Time),
+		os.Getpid(),
+		syscall.Getpgrp(),
+		syscall.Getppid(),
+	)
 
 	cmd.Execute(ctx)
 }
